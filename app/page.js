@@ -1,103 +1,314 @@
-import Image from "next/image";
+"use client";
+// app/page.js
+import { useState, useRef } from "react";
+import Link from "next/link";
+import Calculator from "@/components/calc";
 
-export default function Home() {
+export default function HomePage() {
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.js
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <main className="mx-auto max-w-7xl px-6">
+      {/* Hero */}
+      <section className="py-12 md:py-16">
+        <h1 className="text-4xl md:text-5xl font-semibold leading-tight">
+          Answer 24/7. <span className="text-emerald-600">Stay on top of your business.</span>
+        </h1>
+        <div className="grid md:grid-cols-2 gap-10 items-center">
+          <div>
+            <p className="mt-4 text-lg text-gray-700">
+              TalkwAI helps small businesses handle calls, customers, and chaos — so you can focus on the work that matters.
+              Our AI receptionist <strong>TalkwAI</strong> answers, qualifies, and routes every call. Never miss a lead again.
+            </p>
+            {/* Audio Player */}
+            <div className="mt-4 w-full">
+              <h3 className="text-lg font-semibold mb-4">Listen to TalkwAI in Action</h3>
+              <AudioPlayer />
+            </div>
+          </div>
+          <div>
+            <Calculator />
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
+        <div className="justify-center mt-6 flex flex-col items-center gap-3">
+          <p className="text-lg text-gray-700 font-bold">
+            Try TalkwAI for free. Hear it for yourself.
+          </p>
+          <form className="flex gap-3 max-w-md">
+            <input
+              type="tel"
+              placeholder="Phone number"
+              className="flex-1 px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+            />
+            <button
+              type="submit"
+              className="px-5 py-3 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 whitespace-nowrap font-bold"
+            >
+              Talk with AI
+            </button>
+          </form>
+        </div>
+      </section>
+
+      {/* Pain Points */}
+      <section className="py-16 border-t">
+        <h2 className="text-2xl md:text-3xl font-semibold">The hidden cost of missed calls</h2>
+        <p className="mt-2 text-gray-700">
+          Small businesses lose thousands each year from missed calls, slow responses, and overwhelm. TalkwAI keeps you steady.
+        </p>
+        <div className="mt-8 grid sm:grid-cols-3 gap-6">
+          <Card title="Missed Calls" emoji="📞" text="Never let leads slip. TalkwAI answers, qualifies, and routes 24/7." />
+          <Card title="Lost Jobs" emoji="💸" text="Prioritize emergencies and book faster to capture high-value work." />
+          <Card title="Burnout" emoji="😓" text="Free up your time. Focus on what you do best — we’ll handle the rest." />
+        </div>
+      </section>
+
+      {/* Solution: Meet TalkwAI */}
+      <section id="solution" className="py-16 border-t">
+        <div className="grid md:grid-cols-2 gap-10 items-start">
+          <div>
+            <h2 className="text-2xl md:text-3xl font-semibold">Meet <span className="text-emerald-600">TalkwAI</span> — your AI receptionist</h2>
+            <ul className="mt-6 space-y-3 text-gray-700 list-disc pl-5">
+              <li>Answers every call with a friendly, professional tone.</li>
+              <li>Captures name, number, address, and service need.</li>
+              <li>Flags emergencies, routes jobs, and logs transcripts.</li>
+              <li>Syncs to your dashboard, CRM, Slack, email, and SMS.</li>
+              <li>Customizable script, hours, and escalation rules.</li>
+            </ul>
+            <div className="mt-6">
+              <a href="#how" className="text-emerald-700 font-medium hover:underline">See how it works →</a>
+            </div>
+          </div>
+          <div className="rounded-2xl border p-6 bg-gray-50">
+            <h3 className="font-semibold text-lg">Why TalkwAI?</h3>
+            <p className="mt-2 text-gray-700">
+              Because running a small business is already hard enough. We help you breathe easier, stay on track, and build sustainably.
+            </p>
+            <div className="mt-4 grid sm:grid-cols-2 gap-4 text-sm">
+              <Badge>Never miss a lead</Badge>
+              <Badge>Prioritize emergencies</Badge>
+              <Badge>Faster booking</Badge>
+              <Badge>Real-time transcripts</Badge>
+              <Badge>LA & Chicago first</Badge>
+              <Badge>HVAC-ready today</Badge>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section id="how" className="py-16 border-t">
+        <h2 className="text-2xl md:text-3xl font-semibold">How it works</h2>
+        <div className="mt-8 grid md:grid-cols-3 gap-6">
+          <Step n="1" title="Calls go to TalkwAI" text="Forward your business line. TalkwAI picks up instantly and follows your script." />
+          <Step n="2" title="Qualify & route" text="We capture details, flag priority, and send leads to SMS/email/CRM." />
+          <Step n="3" title="You book & win" text="Your team follows up fast. We track everything in your dashboard." />
+        </div>
+      </section>
+
+      {/* Testimonials */}
+      {/* <section className="py-16 border-t">
+        <h2 className="text-2xl md:text-3xl font-semibold">Loved by busy teams</h2>
+        <div className="mt-6 grid md:grid-cols-3 gap-6">
+          <Quote
+            text="We stopped losing emergency calls after hours. TalkwAI paid for itself in week one."
+            name="Ramon G."
+            quoteRole="Owner, Metro HVAC"
           />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
+          <Quote
+            text="Set up took an afternoon. The transcripts and summaries are gold for training."
+            name="Alyssa P."
+            quoteRole="Ops Lead, Windy City Heating"
           />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
+          <Quote
+            text="We sound professional every time. Our booking rate jumped immediately."
+            name="Derrick L."
+            quoteRole="Founder, LA Cool & Heat"
           />
-          Go to nextjs.org →
-        </a>
-      </footer>
+        </div>
+      </section> */}
+
+      {/* Pricing */}
+      <section id="pricing" className="py-16 border-t">
+        <h2 className="text-2xl md:text-3xl font-semibold">Simple, transparent pricing</h2>
+        <div className="mt-8 grid md:grid-cols-2 gap-6 items-start">
+          <div className="rounded-2xl border p-6">
+            <h3 className="text-xl font-semibold">TalkwAI</h3>
+            <p className="mt-2 text-gray-700">AI voice agent custom-built for your business.</p>
+            <div className="mt-6">
+              <div className="text-3xl font-semibold">$1<span className="text-lg font-normal">/min</span></div>
+              <div className="text-gray-700">Minimum 500 minutes/mo</div>
+            </div>
+            <ul className="mt-6 space-y-2 text-sm text-gray-700 list-disc pl-5">
+              <li>Billed as used, monthly rollover</li>
+              <li>Customized to your workflow</li>
+              <li>Unlimited agents per brand</li>
+              <li>Transcripts, summaries, lead routing</li>
+              <li>CRM, Slack, SMS, email integrations</li>
+              <li>No lock-in. Cancel anytime.</li>
+            </ul>
+            <div className="mt-6 flex gap-3">
+              <Link href="tel:+15075551234" className="inline-block px-5 py-3 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 text-decoration-none">
+                Call Us to Get Started: <span className="font-bold">(507) 555-1234</span>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Final CTA */}
+      <section id="get-started" className="py-16 border-t">
+        <div className="rounded-2xl border p-8 bg-emerald-50">
+          <h2 className="text-2xl md:text-3xl font-semibold">Ready to keep pace with your business?</h2>
+          <p className="mt-2 text-gray-700">
+            Spin up TalkwAI in minutes. Forward your line, set your script, and stop losing leads.
+          </p>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <button type="button" className="px-5 py-3 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700">Start Free Trial</button>
+            <button type="button" className="px-5 py-3 rounded-xl border hover:bg-gray-50">Book a Demo</button>
+          </div>
+        </div>
+      </section>
+
+      {/* Contact */}
+      {/* <section id="contact" className="py-16 border-t">
+        <h2 className="text-2xl md:text-3xl font-semibold">Contact</h2>
+        <p className="mt-2 text-gray-700">Tell us a bit about your business and we’ll reach out fast.</p>
+        <form className="mt-6 grid md:grid-cols-2 gap-4">
+          <input className="border rounded-lg px-4 py-3" placeholder="Full name" />
+          <input className="border rounded-lg px-4 py-3" placeholder="Email" />
+          <input className="border rounded-lg px-4 py-3 md:col-span-2" placeholder="Company name" />
+          <textarea className="border rounded-lg px-4 py-3 md:col-span-2" rows="4" placeholder="What do you need help with?"></textarea>
+          <button type="submit" className="px-5 py-3 rounded-xl bg-black text-white hover:opacity-90 md:col-span-2">Send</button>
+        </form>
+        <p className="mt-3 text-sm text-gray-500">Or email us: hello@talkwai.com</p>
+      </section> */}
+    </main>
+  );
+}
+
+/* ---------- Small UI helpers (JS, no TS) ---------- */
+function Card({ title, emoji, text }) {
+  return (
+    <div className="rounded-2xl border p-6 bg-white">
+      <div className="text-3xl">{emoji}</div>
+      <h3 className="mt-3 font-semibold">{title}</h3>
+      <p className="mt-2 text-gray-700 text-sm">{text}</p>
+    </div>
+  );
+}
+
+function Step({ n, title, text }) {
+  return (
+    <div className="rounded-2xl border p-6">
+      <div className="h-9 w-9 rounded-full bg-emerald-600 text-white flex items-center justify-center font-semibold">{n}</div>
+      <h3 className="mt-3 font-semibold">{title}</h3>
+      <p className="mt-2 text-gray-700 text-sm">{text}</p>
+    </div>
+  );
+}
+
+function Quote({ text, name, quoteRole }) {
+  return (
+    <div className="rounded-2xl border p-6 bg-white">
+      <p className="text-gray-800">“{text}”</p>
+      <div className="mt-4 text-sm text-gray-600">
+        <div className="font-medium">{name}</div>
+        <div>{quoteRole}</div>
+      </div>
+    </div>
+  );
+}
+
+function Badge({ children }) {
+  return (
+    <div className="inline-block rounded-full px-2 py-1 text-base text-center font-medium bg-emerald-600 text-white">
+      {children}
+    </div>
+  );
+}
+
+// AudioPlayer component
+function AudioPlayer() {
+  const tracks = [
+    { title: "HVAC Emergency Call", file: "/demo.mp3", duration: 36 },
+    { title: "Appointment Booking", file: "/demo2.mp3", duration: 23 },
+    { title: "Service Inquiry", file: "/demo3.mp3", duration: 18 }
+  ];
+
+  return (
+    <div className="space-y-3 max-w-sm">
+      {tracks.map((track) => (
+        <SingleAudioPlayer key={track.title} track={track} duration={track.duration} />
+      ))}
+    </div>
+  );
+}
+
+// Single audio player component
+function SingleAudioPlayer({ track, duration: trackDuration }) {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(trackDuration || 0);
+  const audioRef = useRef(null);
+
+  const togglePlay = () => {
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
+
+  const handleTimeUpdate = () => {
+    if (audioRef.current) setCurrentTime(audioRef.current.currentTime);
+  };
+
+  const handleLoadedMetadata = () => {
+    if (audioRef.current) setDuration(audioRef.current.duration || trackDuration || 0);
+  };
+
+  const formatTime = (time) => {
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  };
+
+  const progressPercentage = duration > 0 ? (currentTime / duration) * 100 : 0;
+
+  return (
+    <div className="bg-white border rounded-lg p-4 w-full">
+      <div className="flex justify-between items-center mb-3">
+        <h4 className="font-medium text-sm text-gray-900">{track.title}</h4>
+        <p className="text-sm text-gray-500">{formatTime(currentTime)} / {formatTime(duration)}</p>
+      </div>
+
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={togglePlay}
+          className="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center hover:bg-emerald-700"
+        >
+          {isPlaying ? '⏸' : '▶'}
+        </button>
+        <div className="flex-1 bg-gray-200 rounded-full h-1">
+          <div
+            className="bg-emerald-600 h-1 rounded-full transition-all"
+            style={{ width: `${progressPercentage}%` }}
+          ></div>
+        </div>
+      </div>
+
+      <audio
+        ref={audioRef}
+        src={track.file}
+        onTimeUpdate={handleTimeUpdate}
+        onLoadedMetadata={handleLoadedMetadata}
+        onEnded={() => setIsPlaying(false)}
+      >
+        <track kind="captions" />
+      </audio>
     </div>
   );
 }
