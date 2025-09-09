@@ -16,7 +16,7 @@ export default function HomePage() {
           <div>
             <p className="mt-4 text-lg text-gray-700">
               TalkwAI helps small businesses handle calls, customers, and chaos — so you can focus on the work that matters.
-              Our AI receptionist <strong>TalkwAI</strong> answers, qualifies, and routes every call. Never miss a lead again.
+              Our AI voice agent <strong>TalkwAI</strong> answers, qualifies, and routes every call. Never miss a lead again.
             </p>
             {/* Audio Player */}
             <div className="mt-4 w-full">
@@ -32,19 +32,7 @@ export default function HomePage() {
           <p className="text-lg text-gray-700 font-bold">
             Try TalkwAI for free. Hear it for yourself.
           </p>
-          <form className="flex gap-3 max-w-md">
-            <input
-              type="tel"
-              placeholder="Phone number"
-              className="flex-1 px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-            />
-            <button
-              type="submit"
-              className="px-5 py-3 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 whitespace-nowrap font-bold"
-            >
-              Talk with AI
-            </button>
-          </form>
+          <CallForm />
         </div>
       </section>
 
@@ -157,12 +145,11 @@ export default function HomePage() {
       {/* Final CTA */}
       <section id="get-started" className="py-16 border-t">
         <div className="rounded-2xl border p-8 bg-emerald-50">
-          <h2 className="text-2xl md:text-3xl font-semibold">Ready to keep pace with your business?</h2>
+          <h2 className="text-2xl md:text-3xl font-semibold">Ready to get your time back?</h2>
           <p className="mt-2 text-gray-700">
             Spin up TalkwAI in minutes. Forward your line, set your script, and stop losing leads.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
-            <button type="button" className="px-5 py-3 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700">Start Free Trial</button>
             <button type="button" className="px-5 py-3 rounded-xl border hover:bg-gray-50">Book a Demo</button>
           </div>
         </div>
@@ -239,6 +226,94 @@ function AudioPlayer() {
       {tracks.map((track) => (
         <SingleAudioPlayer key={track.title} track={track} duration={track.duration} />
       ))}
+    </div>
+  );
+}
+
+// Call form component
+function CallForm() {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [message, setMessage] = useState('');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!phoneNumber) {
+      setMessage('Please enter a phone number');
+      return;
+    }
+
+    setIsLoading(true);
+    setMessage('');
+
+    try {
+      const response = await fetch('/api/call', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ phoneNumber }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setMessage('Call initiated! You should receive a call shortly.');
+        // Reset form
+        setName('');
+        setEmail('');
+        setPhoneNumber('');
+      } else {
+        setMessage(data.error || 'Failed to initiate call');
+      }
+    } catch (error) {
+      setMessage('An error occurred. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div>
+      <form className="flex gap-3" onSubmit={handleSubmit}>
+        <input
+          type="text"
+          placeholder="Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className="flex-1 px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+        />
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="flex-1 px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+        />
+        <input
+          type="tel"
+          placeholder="Phone number"
+          value={phoneNumber}
+          onChange={(e) => setPhoneNumber(e.target.value)}
+          required
+          className="flex-1 px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+        />
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="px-5 py-3 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 whitespace-nowrap font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isLoading ? 'Calling...' : 'Talk with AI'}
+        </button>
+      </form>
+      {message && (
+        <p className={`mt-2 text-sm ${message.includes('initiated') ? 'text-emerald-600' : 'text-red-600'}`}>
+          {message}
+        </p>
+      )}
     </div>
   );
 }

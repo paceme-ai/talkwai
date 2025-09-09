@@ -15,13 +15,13 @@ function Currency({ value }) {
     return <span>{fmt.format(isFinite(value) ? value : 0)}</span>;
 }
 
-function Currency2dp({ value }) {
-    const fmt = useMemo(
-        () => new Intl.NumberFormat(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 2 }),
-        []
-    );
-    return <span>{fmt.format(isFinite(value) ? value : 0)}</span>;
-}
+// function Currency2dp({ value }) {
+//     const fmt = useMemo(
+//         () => new Intl.NumberFormat(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 2 }),
+//         []
+//     );
+//     return <span>{fmt.format(isFinite(value) ? value : 0)}</span>;
+// }
 
 function Number0dp({ value }) {
     const fmt = useMemo(
@@ -70,7 +70,7 @@ export default function App() {
                     <div className="space-y-1">
                         <Row label="Monthly lost revenue (MRR)"><Currency value={monthlyRecoveredRevenue} /></Row>
                         <Row label="Monthly cost to get it back"><Currency value={Math.max(missedMinutesPerMonth,500)} /></Row>
-                        <Row label="Return on investment (ROI)"><Number0dp value={monthlyRecoveredRevenue / Math.max(missedMinutesPerMonth, 500)} />x</Row>
+                        <Row label="Return on investment (ROI)" highlight={true}><span className="text-emerald-600"><Number0dp value={monthlyRecoveredRevenue / Math.max(missedMinutesPerMonth, 500)} />x</span></Row>
                     </div>
                 </section>
             </div>
@@ -78,11 +78,11 @@ export default function App() {
     );
 }
 
-function Row({ label, children }) {
+function Row({ label, children, highlight = false }) {
     return (
-        <div className="flex items-center justify-between gap-4">
-            <div className="text-gray-600">{label}</div>
-            <div className="text-right font-semibold">{children}</div>
+        <div className={`flex items-center justify-between gap-4 ${highlight ? 'text-lg font-bold py-2 border-t border-gray-200 mt-2 pt-3' : ''}`}>
+            <div className={highlight ? "text-gray-800 font-semibold" : "text-gray-600"}>{label}</div>
+            <div className={`text-right ${highlight ? 'font-bold text-lg' : 'font-semibold'}`}>{children}</div>
         </div>
     );
 }
