@@ -1,8 +1,8 @@
 // app/layout.js
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Header from "@/components/header";
 import Footer from "@/components/footer";
+import Header from "@/components/header";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,7 +16,8 @@ const geistMono = Geist_Mono({
 
 export const metadata = {
   title: "TalkwAI — Helping businesses talk with AI",
-  description: "TalkwAI helps small businesses stay open with AI receptionists, call handling, and automations 24/7. Never miss a lead again.",
+  description:
+    "TalkwAI helps small businesses stay open with AI receptionists, call handling, and automations 24/7. Never miss a lead again.",
 };
 
 export default function RootLayout({ children }) {
