@@ -2,8 +2,8 @@
 import { useMemo, useState } from "react";
 
 // AI Voice ROI & Pricing Calculator
-// - $1.00/minute pricing
-// - $1500/mo retainer (includes prepaid minutes)
+// - $0.50/minute pricing
+// - $600/mo minimum (includes 1200 prepaid minutes)
 // - Infinite rollover on unused minutes
 // - Competitor cost comparison chart
 
@@ -41,7 +41,7 @@ export default function App() {
   const [bookingRatePct, setBookingRatePct] = useState(25);
   const [avgJobValue, setAvgJobValue] = useState(350);
   const [operatingDaysPerMonth, setOperatingDaysPerMonth] = useState(22);
-  const [avgCallMinutes, setAvgCallMinutes] = useState(3.0);
+  const [avgCallMinutes, _setAvgCallMinutes] = useState(5.0);
 
   const monthlyRecoveredRevenue = useMemo(() => {
     const br = bookingRatePct / 100;
@@ -97,13 +97,6 @@ export default function App() {
               max={31}
               step={1}
             />
-            <InputNumber
-              label="Average call length (min)"
-              value={avgCallMinutes}
-              onChange={setAvgCallMinutes}
-              min={0}
-              step={0.5}
-            />
           </div>
           <h2 className="text-xl font-semibold my-4">Summary</h2>
           <div className="space-y-1">
@@ -111,14 +104,14 @@ export default function App() {
               <Currency value={monthlyRecoveredRevenue} />
             </Row>
             <Row label="Monthly cost to get it back">
-              <Currency value={Math.max(missedMinutesPerMonth, 500)} />
+              <Currency value={Math.max(missedMinutesPerMonth * 0.5, 600)} />
             </Row>
             <Row label="Return on investment (ROI)" highlight={true}>
               <span className="text-emerald-600">
                 <Number0dp
                   value={
                     monthlyRecoveredRevenue /
-                    Math.max(missedMinutesPerMonth, 500)
+                    Math.max(missedMinutesPerMonth * 0.5, 600)
                   }
                 />
                 x
@@ -150,7 +143,14 @@ function Row({ label, children, highlight = false }) {
   );
 }
 
-function InputNumber({ label, value, onChange, min, max, step = 1 }) {
+function InputNumber({
+  label,
+  value,
+  onChange,
+  min,
+  max = undefined,
+  step = 1,
+}) {
   return (
     <label className="block">
       <div className="mb-1 text-gray-600">{label}</div>

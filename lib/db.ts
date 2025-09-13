@@ -1,11 +1,13 @@
-import { init, id } from '@instantdb/react';
-import schema from '../instant.schema';
+import { id, init } from "@instantdb/react";
+import schema from "../instant.schema";
 
 // Get the app ID from environment variables
-const APP_ID = process.env.NEXT_PUBLIC_INSTANT_APP_ID!;
+const APP_ID = process.env.NEXT_PUBLIC_INSTANT_APP_ID;
 
 if (!APP_ID) {
-  throw new Error('NEXT_PUBLIC_INSTANT_APP_ID environment variable is required');
+  throw new Error(
+    "NEXT_PUBLIC_INSTANT_APP_ID environment variable is required",
+  );
 }
 
 // Initialize InstantDB with the schema
@@ -15,7 +17,7 @@ export { id };
 export default db;
 
 // Export types for convenience
-export type { AppSchema } from '../instant.schema';
+export type { AppSchema } from "../instant.schema";
 
 // Common query helpers
 export const queries = {
@@ -26,36 +28,36 @@ export const queries = {
       members: {},
       agents: {},
       tasks: {
-        $: { order: { createdAt: 'desc' } },
+        $: { order: { createdAt: "desc" } },
         agent: {},
         assignedTo: {},
         createdBy: {},
       },
     },
   }),
-  
+
   // Get member with their tenant and tasks
   getMemberWithTasks: (memberId: string) => ({
     members: {
       $: { where: { id: memberId } },
       tenant: {},
       assignedTasks: {
-        $: { order: { createdAt: 'desc' } },
+        $: { order: { createdAt: "desc" } },
         agent: {},
       },
       createdTasks: {
-        $: { order: { createdAt: 'desc' } },
+        $: { order: { createdAt: "desc" } },
         agent: {},
       },
     },
   }),
-  
+
   // Get tasks for a tenant
   getTenantTasks: (tenantId: string, limit = 50) => ({
     tasks: {
-      $: { 
-        where: { 'tenant.id': tenantId },
-        order: { createdAt: 'desc' },
+      $: {
+        where: { "tenant.id": tenantId },
+        order: { createdAt: "desc" },
         limit,
       },
       tenant: {},
@@ -64,11 +66,11 @@ export const queries = {
       createdBy: {},
     },
   }),
-  
+
   // Get all tenants for admin view
   getAllTenants: () => ({
     tenants: {
-      $: { order: { createdAt: 'desc' } },
+      $: { order: { createdAt: "desc" } },
       members: {},
       agents: {},
     },

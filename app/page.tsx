@@ -1,8 +1,8 @@
 // app/page.js
 "use client";
 import Link from "next/link";
-import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useRef, useState } from "react";
 import Calculator from "@/components/calc";
 import db, { id } from "@/lib/db";
 
@@ -39,7 +39,7 @@ export default function HomePage() {
         </div>
         <div className="justify-center mt-6 flex flex-col items-center gap-3">
           <p className="text-lg text-gray-700 font-bold">
-            Try TalkwAI for free. Hear it for yourself.
+            Try TalkwAI for free. Let it speak for itself.
           </p>
           <CallForm />
         </div>
@@ -337,20 +337,20 @@ function CallForm() {
       const tenantId = id();
       const memberId = id();
       const taskId = id();
-      
+
       // Split name into first and last
-      const nameParts = name.trim().split(' ');
-      const firstName = nameParts[0] || '';
-      const lastName = nameParts.slice(1).join(' ') || '';
+      const nameParts = name.trim().split(" ");
+      const firstName = nameParts[0] || "";
+      const lastName = nameParts.slice(1).join(" ") || "";
 
       // Create tenant
       await db.transact(
         db.tx.tenants[tenantId].update({
           name: tenant,
-          status: 'active',
+          status: "active",
           createdAt: Date.now(),
           updatedAt: Date.now(),
-        })
+        }),
       );
 
       // Create member and link to tenant
@@ -361,33 +361,33 @@ function CallForm() {
             lastName,
             email,
             phone: phoneNumber,
-            role: 'owner',
-            status: 'active',
+            role: "owner",
+            status: "active",
             createdAt: Date.now(),
             updatedAt: Date.now(),
           })
-          .link({ tenant: tenantId })
+          .link({ tenant: tenantId }),
       );
 
       // Create initial call task
       await db.transact(
         db.tx.tasks[taskId]
           .update({
-            type: 'call',
-            status: 'in_progress',
-            priority: 'high',
-            fromAddress: 'TalkwAI',
+            type: "call",
+            status: "in_progress",
+            priority: "high",
+            fromAddress: "TalkwAI",
             toAddress: phoneNumber,
-            subject: 'Initial Demo Call',
+            subject: "Initial Demo Call",
             content: `Demo call for ${tenant} - ${name}`,
             startedAt: Date.now(),
             createdAt: Date.now(),
             updatedAt: Date.now(),
           })
-          .link({ 
+          .link({
             tenant: tenantId,
-            createdBy: memberId 
-          })
+            createdBy: memberId,
+          }),
       );
 
       // Initiate the actual call
@@ -404,17 +404,20 @@ function CallForm() {
       if (response.ok) {
         // Send magic code for authentication
         await db.auth.sendMagicCode({ email });
-        
+
         // Store member info in localStorage for the loading page
-        localStorage.setItem('pendingMember', JSON.stringify({
-          memberId,
-          tenantId,
-          email,
-          name: `${firstName} ${lastName}`.trim()
-        }));
-        
+        localStorage.setItem(
+          "pendingMember",
+          JSON.stringify({
+            memberId,
+            tenantId,
+            email,
+            name: `${firstName} ${lastName}`.trim(),
+          }),
+        );
+
         // Route to loading page
-        router.push('/loading');
+        router.push("/loading");
       } else {
         setMessage(data.error || "Failed to initiate call");
       }

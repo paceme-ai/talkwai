@@ -1,4 +1,4 @@
-import { i } from '@instantdb/react';
+import { i } from "@instantdb/react";
 
 const _schema = i.schema({
   entities: {
@@ -10,7 +10,7 @@ const _schema = i.schema({
     $users: i.entity({
       email: i.string().unique().indexed().optional(),
     }),
-    
+
     // Core entities
     tenants: i.entity({
       name: i.string().indexed(),
@@ -19,7 +19,7 @@ const _schema = i.schema({
       createdAt: i.number().indexed(),
       updatedAt: i.number().indexed(),
     }),
-    
+
     members: i.entity({
       firstName: i.string(),
       lastName: i.string(),
@@ -30,7 +30,7 @@ const _schema = i.schema({
       createdAt: i.number().indexed(),
       updatedAt: i.number().indexed(),
     }),
-    
+
     admins: i.entity({
       firstName: i.string(),
       lastName: i.string(),
@@ -41,7 +41,7 @@ const _schema = i.schema({
       createdAt: i.number().indexed(),
       updatedAt: i.number().indexed(),
     }),
-    
+
     agents: i.entity({
       name: i.string().indexed(),
       description: i.string().optional(),
@@ -51,7 +51,7 @@ const _schema = i.schema({
       createdAt: i.number().indexed(),
       updatedAt: i.number().indexed(),
     }),
-    
+
     tasks: i.entity({
       type: i.string().indexed(), // call, email, other
       status: i.string().indexed(), // pending, in_progress, completed, failed
@@ -68,57 +68,57 @@ const _schema = i.schema({
       updatedAt: i.number().indexed(),
     }),
   },
-  
+
   links: {
     // User relationships
     userMembers: {
-      forward: { on: 'members', has: 'one', label: 'user' },
-      reverse: { on: '$users', has: 'one', label: 'member' },
+      forward: { on: "members", has: "one", label: "user" },
+      reverse: { on: "$users", has: "one", label: "member" },
     },
-    
+
     userAdmins: {
-      forward: { on: 'admins', has: 'one', label: 'user' },
-      reverse: { on: '$users', has: 'one', label: 'admin' },
+      forward: { on: "admins", has: "one", label: "user" },
+      reverse: { on: "$users", has: "one", label: "admin" },
     },
-    
+
     // Tenant relationships
     tenantMembers: {
-      forward: { on: 'members', has: 'one', label: 'tenant' },
-      reverse: { on: 'tenants', has: 'many', label: 'members' },
+      forward: { on: "members", has: "one", label: "tenant" },
+      reverse: { on: "tenants", has: "many", label: "members" },
     },
-    
+
     tenantAgents: {
-      forward: { on: 'agents', has: 'one', label: 'tenant' },
-      reverse: { on: 'tenants', has: 'many', label: 'agents' },
+      forward: { on: "agents", has: "one", label: "tenant" },
+      reverse: { on: "tenants", has: "many", label: "agents" },
     },
-    
+
     tenantTasks: {
-      forward: { on: 'tasks', has: 'one', label: 'tenant' },
-      reverse: { on: 'tenants', has: 'many', label: 'tasks' },
+      forward: { on: "tasks", has: "one", label: "tenant" },
+      reverse: { on: "tenants", has: "many", label: "tasks" },
     },
-    
+
     // Task relationships
     taskAgent: {
-      forward: { on: 'tasks', has: 'one', label: 'agent' },
-      reverse: { on: 'agents', has: 'many', label: 'tasks' },
+      forward: { on: "tasks", has: "one", label: "agent" },
+      reverse: { on: "agents", has: "many", label: "tasks" },
     },
-    
+
     taskAssignedMember: {
-      forward: { on: 'tasks', has: 'one', label: 'assignedTo' },
-      reverse: { on: 'members', has: 'many', label: 'assignedTasks' },
+      forward: { on: "tasks", has: "one", label: "assignedTo" },
+      reverse: { on: "members", has: "many", label: "assignedTasks" },
     },
-    
+
     taskCreatedByMember: {
-      forward: { on: 'tasks', has: 'one', label: 'createdBy' },
-      reverse: { on: 'members', has: 'many', label: 'createdTasks' },
+      forward: { on: "tasks", has: "one", label: "createdBy" },
+      reverse: { on: "members", has: "many", label: "createdTasks" },
     },
-    
+
     taskCreatedByAdmin: {
-      forward: { on: 'tasks', has: 'one', label: 'createdByAdmin' },
-      reverse: { on: 'admins', has: 'many', label: 'createdTasks' },
+      forward: { on: "tasks", has: "one", label: "createdByAdmin" },
+      reverse: { on: "admins", has: "many", label: "createdTasks" },
     },
   },
-  
+
   rooms: {
     // Tenant-specific rooms for real-time features
     tenant: {
@@ -142,7 +142,7 @@ const _schema = i.schema({
         }),
       },
     },
-    
+
     // Global admin room
     admin: {
       presence: i.entity({

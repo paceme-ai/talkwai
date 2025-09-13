@@ -6,16 +6,18 @@ export default function Header() {
     <header className="sticky top-0 z-50 bg-white/80 backdrop-blur border-b">
       <div className="mx-auto max-w-7xl px-6 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Image
-            src="/logo.svg"
-            alt="TalkwAI Logo"
-            width={164}
-            height={40}
-            style={{
-              filter:
-                "brightness(0) saturate(100%) invert(8%) sepia(8%) saturate(1171%) hue-rotate(314deg) brightness(95%) contrast(95%)",
-            }}
-          />
+          <Link href="/">
+            <Image
+              src="/logo.svg"
+              alt="TalkwAI Logo"
+              width={123}
+              height={30}
+              style={{
+                filter:
+                  "brightness(0) saturate(100%) invert(8%) sepia(8%) saturate(1171%) hue-rotate(314deg) brightness(95%) contrast(95%)",
+              }}
+            />
+          </Link>
         </div>
         <nav className="hidden md:flex items-center gap-6 text-sm">
           <Link href="#how" className="hover:text-emerald-700">

@@ -16,7 +16,7 @@ function LoadingContent() {
 
   // Check for pending member data and show magic code input
   useEffect(() => {
-    const memberData = localStorage.getItem('pendingMember');
+    const memberData = localStorage.getItem("pendingMember");
     if (memberData) {
       setPendingMember(JSON.parse(memberData));
       // Show magic code input after a short delay
@@ -45,20 +45,20 @@ function LoadingContent() {
     if (!magicCode.trim() || !pendingMember) return;
 
     try {
-      await db.auth.signInWithMagicCode({ 
-        email: pendingMember.email, 
-        code: magicCode.trim() 
+      await db.auth.signInWithMagicCode({
+        email: pendingMember.email,
+        code: magicCode.trim(),
       });
-      
+
       // Clear pending member data
-      localStorage.removeItem('pendingMember');
-      
+      localStorage.removeItem("pendingMember");
+
       // Set success status and continue with progress
       setStatus("success");
       setShowMagicCode(false);
     } catch (error) {
-      console.error('Magic code verification failed:', error);
-      setErrorMessage('Invalid verification code. Please try again.');
+      console.error("Magic code verification failed:", error);
+      setErrorMessage("Invalid verification code. Please try again.");
     }
   };
 
@@ -137,8 +137,9 @@ function LoadingContent() {
                 Verify Your Email
               </h3>
               <p className="text-slate-600 mb-4">
-                We sent a verification code to <strong>{pendingMember?.email}</strong>. 
-                Please enter it below to continue.
+                We sent a verification code to{" "}
+                <strong>{pendingMember?.email}</strong>. Please enter it below
+                to continue.
               </p>
               <form onSubmit={handleMagicCodeSubmit} className="space-y-4">
                 <input
@@ -147,7 +148,6 @@ function LoadingContent() {
                   onChange={(e) => setMagicCode(e.target.value)}
                   placeholder="Enter verification code"
                   className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-center text-lg font-mono"
-                  autoFocus
                   required
                 />
                 <button

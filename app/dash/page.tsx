@@ -1,22 +1,26 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import db from '@/lib/db';
-import { motion } from 'framer-motion';
+import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import db from "@/lib/db";
 
 // Create a room for collaboration
-const room = db.room('tenant', 'main');
+const room = db.room("tenant", "main");
 
 function Dash() {
   const router = useRouter();
   const user = db.useUser();
-  const [showOnboarding, setShowOnboarding] = useState(true);
-  const [emailVerified, setEmailVerified] = useState(false);
-  const [googleConnected, setGoogleConnected] = useState(false);
+  const [showOnboarding, _setShowOnboarding] = useState(true);
+  const [_emailVerified, setEmailVerified] = useState(false);
+  const [_googleConnected, _setGoogleConnected] = useState(false);
 
   // Query member data and tasks
-  const { isLoading: memberLoading, error: memberError, data: memberData } = db.useQuery({
+  const {
+    isLoading: memberLoading,
+    error: memberError,
+    data: memberData,
+  } = db.useQuery({
     members: {
       $: { where: { email: user?.email } },
       tenant: {},
@@ -27,17 +31,23 @@ function Dash() {
   const tenantId = member?.tenant?.id;
 
   // Query tasks for the tenant
-  const { isLoading: tasksLoading, error: tasksError, data: tasksData } = db.useQuery(
-    tenantId ? {
-      tasks: {
-        $: { 
-          where: { 'tenant.id': tenantId },
-          order: { createdAt: 'desc' }
-        },
-        tenant: {},
-        createdBy: {},
-      },
-    } : null
+  const {
+    isLoading: tasksLoading,
+    error: tasksError,
+    data: tasksData,
+  } = db.useQuery(
+    tenantId
+      ? {
+          tasks: {
+            $: {
+              where: { "tenant.id": tenantId },
+              order: { createdAt: "desc" },
+            },
+            tenant: {},
+            createdBy: {},
+          },
+        }
+      : null,
   );
 
   useEffect(() => {
@@ -47,7 +57,7 @@ function Dash() {
   }, [user]);
 
   if (!user) {
-    router.push('/');
+    router.push("/");
     return null;
   }
 
@@ -66,9 +76,13 @@ function Dash() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-red-600 mb-4">Error loading dashboard: {memberError?.message || tasksError?.message}</p>
-          <button 
-            onClick={() => router.push('/')}
+          <p className="text-red-600 mb-4">
+            Error loading dashboard:{" "}
+            {memberError?.message || tasksError?.message}
+          </p>
+          <button
+            type="button"
+            onClick={() => router.push("/")}
             className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
           >
             Go Home
@@ -92,20 +106,33 @@ function Dash() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                Welcome back{member?.firstName ? `, ${member.firstName}` : ''}!
+                Welcome back{member?.firstName ? `, ${member.firstName}` : ""}!
               </h1>
               <p className="text-gray-600 mt-1 sm:mt-2 text-sm sm:text-base">
-                {member?.tenant?.name || 'Your Organization'} Dashboard
+                {member?.tenant?.name || "Your Organization"} Dashboard
               </p>
             </div>
             <div className="flex items-center space-x-3 sm:space-x-4">
               <OnlineUsers />
               <button
+                type="button"
                 onClick={() => db.auth.signOut()}
                 className="px-3 sm:px-4 py-2 text-sm text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200 flex items-center space-x-2"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                <svg
+                  aria-label="Sign out button"
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <title>Sign out</title>
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                  />
                 </svg>
                 <span className="hidden sm:inline">Sign Out</span>
               </button>
@@ -114,11 +141,7 @@ function Dash() {
         </motion.div>
 
         {/* Onboarding Banner */}
-        {showOnboarding && (
-          <OnboardingBanner 
-            member={member}
-          />
-        )}
+        {showOnboarding && <OnboardingBanner member={member} />}
 
         {/* Tasks Table */}
         <TasksTable tasks={tasks} member={member} />
@@ -133,7 +156,7 @@ function OnlineUsers() {
   const numUsers = 1 + Object.keys(peers).length;
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       className="flex items-center space-x-2 bg-white border border-gray-200 rounded-full px-3 py-2 shadow-sm"
@@ -143,7 +166,7 @@ function OnlineUsers() {
         <div className="absolute inset-0 w-2 h-2 bg-green-400 rounded-full animate-ping opacity-75"></div>
       </div>
       <span className="text-sm font-medium text-gray-700">
-        {numUsers} {numUsers === 1 ? 'user' : 'users'} online
+        {numUsers} {numUsers === 1 ? "user" : "users"} online
       </span>
     </motion.div>
   );
@@ -165,11 +188,11 @@ function OnboardingBanner({ member }) {
         clientName: "google-web",
         redirectURL: window.location.href,
       });
-      
+
       // Redirect to Google OAuth
       window.location.href = url;
     } catch (error) {
-      console.error('Failed to connect Google:', error);
+      console.error("Failed to connect Google:", error);
       setIsConnectingGoogle(false);
     }
   };
@@ -177,27 +200,28 @@ function OnboardingBanner({ member }) {
   const handleVerifyEmail = () => {
     // Mark email verification as completed for demo purposes
     // In a real app, this would trigger the magic code flow
-    setCompletedTasks(prev => [...prev, 'verify-email']);
+    setCompletedTasks((prev) => [...prev, "verify-email"]);
   };
 
   const tasks = [
-    { 
-      id: 'verify-email', 
-      label: 'Verify your email address', 
-      completed: member?.emailVerified || completedTasks.includes('verify-email'),
+    {
+      id: "verify-email",
+      label: "Verify your email address",
+      completed:
+        member?.emailVerified || completedTasks.includes("verify-email"),
       action: handleVerifyEmail,
-      buttonText: 'Verify'
+      buttonText: "Verify",
     },
-    { 
-      id: 'connect-google', 
-      label: 'Connect your Google account', 
-      completed: completedTasks.includes('connect-google'),
+    {
+      id: "connect-google",
+      label: "Connect your Google account",
+      completed: completedTasks.includes("connect-google"),
       action: handleGoogleConnect,
-      buttonText: isConnectingGoogle ? 'Connecting...' : 'Connect'
+      buttonText: isConnectingGoogle ? "Connecting..." : "Connect",
     },
   ];
 
-  const allCompleted = tasks.every(task => task.completed);
+  const allCompleted = tasks.every((task) => task.completed);
 
   if (allCompleted) {
     return (
@@ -210,8 +234,17 @@ function OnboardingBanner({ member }) {
       >
         <div className="flex items-center space-x-2">
           <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
-            <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+            <svg
+              className="w-3 h-3 text-white"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <title>Checkmark</title>
+              <path
+                fillRule="evenodd"
+                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                clipRule="evenodd"
+              />
             </svg>
           </div>
           <span className="text-sm font-medium text-green-800">
@@ -237,29 +270,45 @@ function OnboardingBanner({ member }) {
             {tasks.map((task) => (
               <div key={task.id} className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
-                  <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                    task.completed
-                      ? 'bg-green-500 border-green-500'
-                      : 'border-gray-300'
-                  }`}>
+                  <div
+                    className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                      task.completed
+                        ? "bg-green-500 border-green-500"
+                        : "border-gray-300"
+                    }`}
+                  >
                     {task.completed && (
-                      <svg className="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      <svg
+                        className="w-2 h-2 text-white"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <title>Completed</title>
+                        <path
+                          fillRule="evenodd"
+                          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                          clipRule="evenodd"
+                        />
                       </svg>
                     )}
                   </div>
-                  <span className={`text-sm ${
-                    task.completed
-                      ? 'text-gray-500 line-through'
-                      : 'text-blue-800'
-                  }`}>
+                  <span
+                    className={`text-sm ${
+                      task.completed
+                        ? "text-gray-500 line-through"
+                        : "text-blue-800"
+                    }`}
+                  >
                     {task.label}
                   </span>
                 </div>
                 {!task.completed && (
-                  <button 
+                  <button
+                    type="button"
                     onClick={task.action}
-                    disabled={task.id === 'connect-google' && isConnectingGoogle}
+                    disabled={
+                      task.id === "connect-google" && isConnectingGoogle
+                    }
                     className="text-xs bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {task.buttonText}
@@ -270,11 +319,17 @@ function OnboardingBanner({ member }) {
           </div>
         </div>
         <button
+          type="button"
           onClick={() => setIsVisible(false)}
           className="text-blue-400 hover:text-blue-600 ml-4"
         >
           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+            <title>Close</title>
+            <path
+              fillRule="evenodd"
+              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+              clipRule="evenodd"
+            />
           </svg>
         </button>
       </div>
@@ -284,42 +339,46 @@ function OnboardingBanner({ member }) {
 
 // TasksTable Component
 function TasksTable({ tasks, member }) {
-  const currentCall = tasks.find(task => task.type === 'call' && task.status === 'in_progress');
-  const otherTasks = tasks.filter(task => !(task.type === 'call' && task.status === 'in_progress'));
+  const currentCall = tasks.find(
+    (task) => task.type === "call" && task.status === "in_progress",
+  );
+  const otherTasks = tasks.filter(
+    (task) => !(task.type === "call" && task.status === "in_progress"),
+  );
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'completed':
-        return 'bg-green-100 text-green-800 border-green-200';
-      case 'in_progress':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'pending':
-        return 'bg-gray-100 text-gray-800 border-gray-200';
-      case 'failed':
-        return 'bg-red-100 text-red-800 border-red-200';
+      case "completed":
+        return "bg-green-100 text-green-800 border-green-200";
+      case "in_progress":
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      case "pending":
+        return "bg-gray-100 text-gray-800 border-gray-200";
+      case "failed":
+        return "bg-red-100 text-red-800 border-red-200";
       default:
-        return 'bg-blue-100 text-blue-800 border-blue-200';
+        return "bg-blue-100 text-blue-800 border-blue-200";
     }
   };
 
   const getTypeColor = (type) => {
     switch (type) {
-      case 'call':
-        return 'bg-green-100 text-green-800 border-green-200';
-      case 'meeting':
-        return 'bg-purple-100 text-purple-800 border-purple-200';
-      case 'task':
-        return 'bg-blue-100 text-blue-800 border-blue-200';
+      case "call":
+        return "bg-green-100 text-green-800 border-green-200";
+      case "meeting":
+        return "bg-purple-100 text-purple-800 border-purple-200";
+      case "task":
+        return "bg-blue-100 text-blue-800 border-blue-200";
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+        return "bg-gray-100 text-gray-800 border-gray-200";
     }
   };
 
   const formatDate = (timestamp) => {
-    return new Date(timestamp).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
+    return new Date(timestamp).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
     });
   };
 
@@ -340,7 +399,7 @@ function TasksTable({ tasks, member }) {
           </div>
           <div className="flex items-center space-x-2">
             <div className="text-sm text-gray-500">
-              {tasks.length} {tasks.length === 1 ? 'task' : 'tasks'}
+              {tasks.length} {tasks.length === 1 ? "task" : "tasks"}
             </div>
             {currentCall && (
               <div className="flex items-center space-x-1 text-green-600">
@@ -351,7 +410,7 @@ function TasksTable({ tasks, member }) {
           </div>
         </div>
       </div>
-      
+
       <div className="overflow-x-auto">
         {tasks.length > 0 ? (
           <table className="w-full">
@@ -373,7 +432,7 @@ function TasksTable({ tasks, member }) {
             </thead>
             <tbody className="bg-white divide-y divide-gray-100">
               {currentCall && (
-                <motion.tr 
+                <motion.tr
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   className="bg-gradient-to-r from-green-50 to-emerald-50 hover:from-green-100 hover:to-emerald-100 transition-all duration-200"
@@ -383,7 +442,8 @@ function TasksTable({ tasks, member }) {
                       <div className="w-3 h-3 bg-green-500 rounded-full mr-3 animate-pulse shadow-lg"></div>
                       <div>
                         <div className="text-sm font-semibold text-gray-900">
-                          Current Call - {member?.tenant?.name || 'Organization'}
+                          Current Call -{" "}
+                          {member?.tenant?.name || "Organization"}
                         </div>
                         <div className="text-sm text-gray-600">
                           Active call in progress
@@ -392,12 +452,16 @@ function TasksTable({ tasks, member }) {
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${getTypeColor('call')}`}>
+                    <span
+                      className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${getTypeColor("call")}`}
+                    >
                       📞 Call
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor('in_progress')}`}>
+                    <span
+                      className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor("in_progress")}`}
+                    >
                       🔄 In Progress
                     </span>
                   </td>
@@ -407,7 +471,7 @@ function TasksTable({ tasks, member }) {
                 </motion.tr>
               )}
               {otherTasks.map((task, index) => (
-                <motion.tr 
+                <motion.tr
                   key={task.id}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -417,7 +481,10 @@ function TasksTable({ tasks, member }) {
                   <td className="px-6 py-4">
                     <div>
                       <div className="text-sm font-medium text-gray-900">
-                        {task.subject || task.title || task.description || 'Untitled Task'}
+                        {task.subject ||
+                          task.title ||
+                          task.description ||
+                          "Untitled Task"}
                       </div>
                       {task.content && (
                         <div className="text-sm text-gray-500 mt-1">
@@ -432,13 +499,29 @@ function TasksTable({ tasks, member }) {
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${getTypeColor(task.type || 'task')}`}>
-                      {task.type === 'meeting' ? '📅' : task.type === 'call' ? '📞' : '📋'} {task.type || 'Task'}
+                    <span
+                      className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${getTypeColor(task.type || "task")}`}
+                    >
+                      {task.type === "meeting"
+                        ? "📅"
+                        : task.type === "call"
+                          ? "📞"
+                          : "📋"}{" "}
+                      {task.type || "Task"}
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(task.status || 'pending')}`}>
-                      {task.status === 'completed' ? '✅' : task.status === 'in_progress' ? '🔄' : task.status === 'failed' ? '❌' : '⏳'} {(task.status || 'pending').replace('_', ' ')}
+                    <span
+                      className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(task.status || "pending")}`}
+                    >
+                      {task.status === "completed"
+                        ? "✅"
+                        : task.status === "in_progress"
+                          ? "🔄"
+                          : task.status === "failed"
+                            ? "❌"
+                            : "⏳"}{" "}
+                      {(task.status || "pending").replace("_", " ")}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600">
@@ -457,13 +540,27 @@ function TasksTable({ tasks, member }) {
               className="text-gray-500"
             >
               <div className="mx-auto h-16 w-16 text-gray-300 mb-4">
-                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-full h-full">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                <svg
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  className="w-full h-full"
+                >
+                  <title>Empty state</title>
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.5}
+                    d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                  />
                 </svg>
               </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No tasks yet</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                No tasks yet
+              </h3>
               <p className="text-sm text-gray-600 max-w-sm mx-auto">
-                Your tasks will appear here as you create them. Start by making a call or creating your first task.
+                Your tasks will appear here as you create them. Start by making
+                a call or creating your first task.
               </p>
             </motion.div>
           </div>
