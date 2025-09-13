@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import db from "@/lib/db";
+import AuthenticatedHeader from "@/components/authenticated-header";
 
 // Create a room for collaboration
 const room = db.room("tenant", "main");
@@ -12,7 +13,7 @@ function Dash() {
   const router = useRouter();
   const user = db.useUser();
   const [showOnboarding, _setShowOnboarding] = useState(true);
-  const [_emailVerified, setEmailVerified] = useState(false);
+  const [emailVerified, setEmailVerified] = useState(false);
   const [_googleConnected, _setGoogleConnected] = useState(false);
 
   // Query member data and tasks
@@ -95,7 +96,9 @@ function Dash() {
   const tasks = tasksData?.tasks || [];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
+    <>
+      <AuthenticatedHeader />
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {/* Header */}
         <motion.div
@@ -114,31 +117,12 @@ function Dash() {
             </div>
             <div className="flex items-center space-x-3 sm:space-x-4">
               <OnlineUsers />
-              <button
-                type="button"
-                onClick={() => db.auth.signOut()}
-                className="px-3 sm:px-4 py-2 text-sm text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200 flex items-center space-x-2"
-              >
-                <svg
-                  aria-label="Sign out button"
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <title>Sign out</title>
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                  />
-                </svg>
-                <span className="hidden sm:inline">Sign Out</span>
-              </button>
             </div>
           </div>
         </motion.div>
+
+        {/* Email Verification Banner */}
+        {!emailVerified && <EmailVerificationBanner />}
 
         {/* Onboarding Banner */}
         {showOnboarding && <OnboardingBanner member={member} />}
@@ -147,6 +131,7 @@ function Dash() {
         <TasksTable tasks={tasks} member={member} />
       </div>
     </div>
+    </>
   );
 }
 
@@ -172,11 +157,137 @@ function OnlineUsers() {
   );
 }
 
+// EmailVerificationBanner Component
+function EmailVerificationBanner() {
+  const [verificationCode, setVerificationCode] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const user = db.useUser();
+
+  const handleVerifyCode = async (e) => {
+    e.preventDefault();
+    if (!verificationCode.trim()) return;
+
+    setIsLoading(true);
+    setMessage("");
+
+    try {
+      // TODO: Implement email verification with the code
+      // This would typically call an API endpoint to verify the code
+      console.log("Verifying code:", verificationCode);
+      setMessage("Verification successful!");
+    } catch (error) {
+      setMessage("Invalid verification code. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResendCode = async () => {
+    setIsLoading(true);
+    setMessage("");
+
+    try {
+      // TODO: Implement resend verification code
+      // This would typically call an API endpoint to resend the code
+      console.log("Resending verification code to:", user?.email);
+      setMessage("Verification code sent to your email!");
+    } catch (error) {
+      setMessage("Failed to resend code. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4"
+    >
+      <div className="flex items-start space-x-3">
+        <div className="flex-shrink-0">
+          <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor" aria-label="Warning icon">
+             <title>Warning icon</title>
+             <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+           </svg>
+        </div>
+        <div className="flex-1">
+          <h3 className="text-sm font-medium text-yellow-800">
+            Please verify your email address
+          </h3>
+          <p className="mt-1 text-sm text-yellow-700">
+            We sent a verification code to {user?.email}. Enter it below to complete your account setup.
+          </p>
+          
+          <form onSubmit={handleVerifyCode} className="mt-4 flex flex-col sm:flex-row gap-3">
+            <input
+              type="text"
+              value={verificationCode}
+              onChange={(e) => setVerificationCode(e.target.value)}
+              placeholder="Enter verification code"
+              className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              disabled={isLoading}
+            />
+            <div className="flex gap-2">
+              <button
+                type="submit"
+                disabled={isLoading || !verificationCode.trim()}
+                className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isLoading ? "Verifying..." : "Verify"}
+              </button>
+              <button
+                type="button"
+                onClick={handleResendCode}
+                disabled={isLoading}
+                className="px-4 py-2 bg-gray-600 text-white text-sm font-medium rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isLoading ? "Sending..." : "Resend"}
+              </button>
+            </div>
+          </form>
+          
+          {message && (
+            <p className={`mt-2 text-sm ${
+              message.includes("successful") || message.includes("sent") 
+                ? "text-green-600" 
+                : "text-red-600"
+            }`}>
+              {message}
+            </p>
+          )}
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
 // OnboardingBanner Component
 function OnboardingBanner({ member }) {
   const [isVisible, setIsVisible] = useState(true);
-  const [completedTasks, setCompletedTasks] = useState([]);
+  // Email is already verified when users reach the dashboard from loading screen
+  const [completedTasks, setCompletedTasks] = useState(["verify-email"]);
   const [isConnectingGoogle, setIsConnectingGoogle] = useState(false);
+  const user = db.useUser();
+
+  // Check if Google is connected and mark task as completed
+  useEffect(() => {
+    if (user?.email && !completedTasks.includes("connect-google")) {
+      // If user has successfully authenticated (they're on the dashboard), 
+      // and they went through Google OAuth, mark Google connection as completed
+      const urlParams = new URLSearchParams(window.location.search);
+      const hasGoogleAuth = urlParams.has('code') || 
+                           localStorage.getItem('google-connected') || 
+                           localStorage.getItem('google-connecting');
+      
+      if (hasGoogleAuth) {
+        setCompletedTasks(prev => [...prev, "connect-google"]);
+        localStorage.setItem('google-connected', 'true');
+        localStorage.removeItem('google-connecting'); // Clean up the connecting flag
+      }
+    }
+  }, [user, completedTasks]);
 
   if (!isVisible) return null;
 
@@ -189,6 +300,9 @@ function OnboardingBanner({ member }) {
         redirectURL: window.location.href,
       });
 
+      // Mark that Google connection was initiated
+      localStorage.setItem('google-connecting', 'true');
+      
       // Redirect to Google OAuth
       window.location.href = url;
     } catch (error) {

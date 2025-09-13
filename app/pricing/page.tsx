@@ -21,10 +21,11 @@ export default function PricingPage() {
               <span className="text-5xl font-bold text-gray-900">$695</span>
               <span className="text-xl text-gray-600">/month</span>
             </div>
+            <div className="mb-4.5 h-5" />
             <p className="text-gray-600">Perfect for growing businesses</p>
           </div>
 
-          <div className="space-y-4 mb-8">
+          {/* <div className="space-y-4 mb-8">
             <div className="flex items-center">
               <svg
                 className="w-5 h-5 text-emerald-500 mr-3"
@@ -89,7 +90,7 @@ export default function PricingPage() {
                 Additional services added regularly
               </span>
             </div>
-          </div>
+          </div> */}
 
           <Link
             href="/register"
@@ -103,20 +104,20 @@ export default function PricingPage() {
         <div className="bg-emerald-50 border-2 border-emerald-500 rounded-2xl p-8 shadow-sm relative">
           <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
             <span className="bg-emerald-500 text-white px-4 py-2 rounded-full text-sm font-semibold">
-              40% OFF
+              25% OFF
             </span>
           </div>
 
           <div className="text-center mb-8">
             <h3 className="text-2xl font-bold text-gray-900 mb-2">Yearly</h3>
             <div className="mb-2">
-              <span className="text-5xl font-bold text-gray-900">$5,000</span>
+              <span className="text-5xl font-bold text-gray-900">$6,250</span>
               <span className="text-xl text-gray-600">/year</span>
             </div>
             <div className="mb-4">
               <span className="text-lg text-gray-500 line-through">$8,340</span>
               <span className="text-lg text-emerald-600 font-semibold ml-2">
-                Save $3,340
+                Save $2,090
               </span>
             </div>
             <p className="text-gray-600">
@@ -124,7 +125,7 @@ export default function PricingPage() {
             </p>
           </div>
 
-          <div className="space-y-4 mb-8">
+          {/* <div className="space-y-4 mb-8">
             <div className="flex items-center">
               <svg
                 className="w-5 h-5 text-emerald-500 mr-3"
@@ -203,10 +204,10 @@ export default function PricingPage() {
                 />
               </svg>
               <span className="text-gray-700 font-semibold">
-                40% savings vs monthly
+                25% savings vs monthly
               </span>
             </div>
-          </div>
+          </div> */}
 
           <Link
             href="/register"
@@ -219,60 +220,30 @@ export default function PricingPage() {
 
       {/* Guarantees Section */}
       <div className="bg-gray-50 rounded-2xl p-8 mb-16">
-        <h2 className="text-3xl font-bold text-gray-900 text-center mb-8">
-          Our Guarantees
-        </h2>
-        <div className="grid md:grid-cols-2 gap-8">
-          <div className="text-center">
-            <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg
-                className="w-8 h-8 text-emerald-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                />
-              </svg>
-            </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">
-              Price Guarantee
-            </h3>
-            <p className="text-gray-600">
-              We will never increase our cost per credit. Your investment is
-              protected as we scale.
-            </p>
+        <div className="text-center">
+          <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg
+              className="w-8 h-8 text-emerald-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
           </div>
-          <div className="text-center">
-            <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg
-                className="w-8 h-8 text-emerald-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-            </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">
-              Satisfaction Guarantee
-            </h3>
-            <p className="text-gray-600">
-              We will refund any unused credits at their purchase price. No
-              questions asked.
-            </p>
-          </div>
+          <h3 className="text-xl font-bold text-gray-900 mb-2">
+            Satisfaction Guarantee
+          </h3>
+          <p className="text-gray-600">
+            We will pro-rate and refund any remaining days in your service plan.
+            No questions asked.
+          </p>
         </div>
       </div>
 
@@ -281,27 +252,7 @@ export default function PricingPage() {
         <h2 className="text-3xl font-bold text-gray-900 text-center mb-8">
           Frequently Asked Questions
         </h2>
-        <div className="space-y-6">
-          <div className="bg-white border border-gray-200 rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              What are credits and how do they work?
-            </h3>
-            <p className="text-gray-600">
-              Credits are our universal currency for all TalkwAI services. Use
-              them for AI calls, email automation, and any new features we add.
-              Credits never expire, so you can use them at your own pace.
-            </p>
-          </div>
-          <div className="bg-white border border-gray-200 rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Can I change my plan later?
-            </h3>
-            <p className="text-gray-600">
-              Yes, you can upgrade or downgrade your plan at any time. Unused
-              credits will carry over, and we'll prorate any billing
-              differences.
-            </p>
-          </div>
+        <div className="space-y-4">
           <div className="bg-white border border-gray-200 rounded-lg p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
               What new services are you adding?
@@ -309,7 +260,7 @@ export default function PricingPage() {
             <p className="text-gray-600">
               We're constantly expanding our AI capabilities. Upcoming features
               include advanced email automation, CRM integrations, and custom AI
-              workflows. All will use the same credit system.
+              workflows. All are included in the same monthly service.
             </p>
           </div>
           <div className="bg-white border border-gray-200 rounded-lg p-6">
@@ -318,8 +269,8 @@ export default function PricingPage() {
             </h3>
             <p className="text-gray-600">
               We offer a satisfaction guarantee instead of a traditional trial.
-              If you're not completely satisfied, we'll refund any unused
-              credits at their full purchase price.
+              If you're not completely satisfied, we'll refund any remaining
+              days in your service plan at their full purchase price.
             </p>
           </div>
         </div>
