@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import db from "@/lib/db";
 import AuthenticatedHeader from "@/components/authenticated-header";
 
@@ -291,31 +292,22 @@ function OnboardingBanner({ member }) {
 
   if (!isVisible) return null;
 
-  const handleGoogleConnect = async () => {
-    setIsConnectingGoogle(true);
-    try {
-      // Create the authorization URL
-      const url = db.auth.createAuthorizationURL({
-        clientName: "google-web",
-        redirectURL: window.location.href,
-      });
-
-      // Mark that Google connection was initiated
-      localStorage.setItem('google-connecting', 'true');
-      
-      // Redirect to Google OAuth
-      window.location.href = url;
-    } catch (error) {
-      console.error("Failed to connect Google:", error);
-      setIsConnectingGoogle(false);
-    }
-  };
-
   const handleVerifyEmail = () => {
     // Mark email verification as completed for demo purposes
     // In a real app, this would trigger the magic code flow
     setCompletedTasks((prev) => [...prev, "verify-email"]);
   };
+
+  // Determine redirect URL based on environment
+  const isLocalhost = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+  const googleRedirectURL = isLocalhost 
+    ? `http://localhost:${typeof window !== 'undefined' ? window.location.port || '3000' : '3000'}/dash`
+    : `${typeof window !== 'undefined' ? window.location.origin : ''}/dash`;
+  
+  const googleAuthURL = db.auth.createAuthorizationURL({
+    clientName: "google-web",
+    redirectURL: googleRedirectURL,
+  });
 
   const tasks = [
     {
@@ -325,13 +317,15 @@ function OnboardingBanner({ member }) {
         member?.emailVerified || completedTasks.includes("verify-email"),
       action: handleVerifyEmail,
       buttonText: "Verify",
+      type: "button"
     },
     {
       id: "connect-google",
       label: "Connect your Google account",
       completed: completedTasks.includes("connect-google"),
-      action: handleGoogleConnect,
+      url: googleAuthURL,
       buttonText: isConnectingGoogle ? "Connecting..." : "Connect",
+      type: "link"
     },
   ];
 
@@ -417,16 +411,31 @@ function OnboardingBanner({ member }) {
                   </span>
                 </div>
                 {!task.completed && (
-                  <button
-                    type="button"
-                    onClick={task.action}
-                    disabled={
-                      task.id === "connect-google" && isConnectingGoogle
-                    }
-                    className="text-xs bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {task.buttonText}
-                  </button>
+                  task.type === "link" ? (
+                    <Link
+                      href={task.url}
+                      className="text-xs bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 inline-block text-center"
+                      onClick={() => {
+                        if (task.id === "connect-google") {
+                          setIsConnectingGoogle(true);
+                          localStorage.setItem('google-connecting', 'true');
+                        }
+                      }}
+                    >
+                      {task.buttonText}
+                    </Link>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={task.action}
+                      disabled={
+                        task.id === "connect-google" && isConnectingGoogle
+                      }
+                      className="text-xs bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {task.buttonText}
+                    </button>
+                  )
                 )}
               </div>
             ))}
@@ -687,9 +696,32 @@ function TasksTable({ tasks, member }) {
 // Wrap the dashboard in authentication
 function AuthenticatedDash() {
   return (
-    <db.SignedIn>
-      <Dash />
-    </db.SignedIn>
+    <>
+      <db.SignedIn>
+        <Dash />
+      </db.SignedIn>
+      <db.SignedOut>
+        <RedirectToLogin />
+      </db.SignedOut>
+    </>
+  );
+}
+
+// Component to redirect unauthenticated users to login
+function RedirectToLogin() {
+  const router = useRouter();
+  
+  useEffect(() => {
+    router.push("/login");
+  }, [router]);
+  
+  return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+        <p className="text-gray-600">Redirecting to login...</p>
+      </div>
+    </div>
   );
 }
 

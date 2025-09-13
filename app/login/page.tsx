@@ -10,6 +10,25 @@ export default function LoginPage() {
   const [magicCode, setMagicCode] = useState("");
   const [showCodeInput, setShowCodeInput] = useState(false);
 
+  const handleGoogleLogin = () => {
+    const hostname = window.location.hostname;
+    const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
+    const redirectURL = isLocalhost 
+      ? 'http://localhost:3000/dash' 
+      : `${window.location.origin}/dash`;
+    
+    console.log('Hostname:', hostname);
+    console.log('Is localhost:', isLocalhost);
+    console.log('Redirect URL:', redirectURL);
+    
+    const url = db.auth.createAuthorizationURL({
+      clientName: "google-web",
+      redirectURL: redirectURL,
+    });
+    
+    window.location.href = url;
+  };
+
   const handleMagicCodeSubmit = async (e) => {
     e.preventDefault();
 
@@ -56,25 +75,9 @@ export default function LoginPage() {
     }
   };
 
-  const handleGoogleLogin = async () => {
-    try {
-      setIsLoading(true);
-      setMessage("");
-      
-      // Create the authorization URL
-      const url = db.auth.createAuthorizationURL({
-        clientName: "google-web",
-        redirectURL: window.location.origin + "/dash"
-      });
-      
-      // Redirect to Google OAuth
-      window.location.href = url;
-    } catch (error) {
-      console.error("Error with Google login:", error);
-      setMessage("Failed to connect with Google. Please try again.");
-      setIsLoading(false);
-    }
-  };
+  // Create the authorization URL:
+  // This will be created dynamically in the handleGoogleLogin function
+  // to avoid SSR issues with window object
 
   return (
     <main className="mx-auto max-w-md px-6 py-12">
@@ -105,41 +108,41 @@ export default function LoginPage() {
         {!showCodeInput && (
           <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
             <form onSubmit={handleMagicCodeSubmit}>
-            <div className="flex items-center gap-3">
-              <div className="flex-shrink-0">
-                <svg
-                  className="w-5 h-5 text-gray-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  aria-label="Email icon"
+              <div className="flex items-center gap-3">
+                <div className="flex-shrink-0">
+                  <svg
+                    className="w-5 h-5 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-label="Email icon"
+                  >
+                    <title>Email icon</title>
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                    />
+                  </svg>
+                </div>
+                <input
+                  type="email"
+                  placeholder="Email me a Magic Code"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="flex-1 px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                />
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="px-4 py-3 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <title>Email icon</title>
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                  />
-                </svg>
+                  {isLoading ? "Sending..." : "Send"}
+                </button>
               </div>
-              <input
-                type="email"
-                placeholder="Email me a Magic Code"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="flex-1 px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-              />
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="px-4 py-3 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isLoading ? "Sending..." : "Send"}
-              </button>
-            </div>
-          </form>
-        </div>
+            </form>
+          </div>
         )}
 
         {/* Magic Code Verification */}
