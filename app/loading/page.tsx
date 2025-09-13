@@ -2,6 +2,7 @@
 import { motion } from "framer-motion";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
+import db from "@/lib/db";
 
 function LoadingContent() {
   const router = useRouter();
@@ -9,6 +10,21 @@ function LoadingContent() {
   const [progress, setProgress] = useState(0);
   const [status, setStatus] = useState("loading");
   const [errorMessage, setErrorMessage] = useState("");
+  const [showMagicCode, setShowMagicCode] = useState(false);
+  const [magicCode, setMagicCode] = useState("");
+  const [pendingMember, setPendingMember] = useState(null);
+
+  // Check for pending member data and show magic code input
+  useEffect(() => {
+    const memberData = localStorage.getItem('pendingMember');
+    if (memberData) {
+      setPendingMember(JSON.parse(memberData));
+      // Show magic code input after a short delay
+      setTimeout(() => {
+        setShowMagicCode(true);
+      }, 2000);
+    }
+  }, []);
 
   // Check for error or success status from URL params
   useEffect(() => {
@@ -23,19 +39,42 @@ function LoadingContent() {
     }
   }, [searchParams]);
 
+  // Handle magic code submission
+  const handleMagicCodeSubmit = async (e) => {
+    e.preventDefault();
+    if (!magicCode.trim() || !pendingMember) return;
+
+    try {
+      await db.auth.signInWithMagicCode({ 
+        email: pendingMember.email, 
+        code: magicCode.trim() 
+      });
+      
+      // Clear pending member data
+      localStorage.removeItem('pendingMember');
+      
+      // Set success status and continue with progress
+      setStatus("success");
+      setShowMagicCode(false);
+    } catch (error) {
+      console.error('Magic code verification failed:', error);
+      setErrorMessage('Invalid verification code. Please try again.');
+    }
+  };
+
   useEffect(() => {
-    // Only animate progress if status is loading or success
-    if (status === "error") return;
+    // Only animate progress if status is loading or success, and not showing magic code
+    if (status === "error" || showMagicCode) return;
 
     // Animate progress bar over 20 seconds
     const interval = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) {
           clearInterval(interval);
-          // Redirect to admin page after loading completes (only if successful)
-          if (status === "success" || status === "loading") {
+          // Redirect to dashboard after loading completes (only if successful)
+          if (status === "success") {
             setTimeout(() => {
-              router.push("/admin");
+              router.push("/dash");
             }, 500);
           }
           return 100;
@@ -45,7 +84,7 @@ function LoadingContent() {
     }, 100);
 
     return () => clearInterval(interval);
-  }, [router, status]);
+  }, [router, status, showMagicCode]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-slate-50 flex items-center justify-center">
@@ -85,8 +124,46 @@ function LoadingContent() {
           )}
         </motion.div>
 
+        {/* Magic Code Input - Show when needed */}
+        {showMagicCode && status !== "error" && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="mb-8"
+          >
+            <div className="bg-white p-6 rounded-lg shadow-lg border border-slate-200 max-w-md mx-auto">
+              <h3 className="text-xl font-semibold text-slate-900 mb-4">
+                Verify Your Email
+              </h3>
+              <p className="text-slate-600 mb-4">
+                We sent a verification code to <strong>{pendingMember?.email}</strong>. 
+                Please enter it below to continue.
+              </p>
+              <form onSubmit={handleMagicCodeSubmit} className="space-y-4">
+                <input
+                  type="text"
+                  value={magicCode}
+                  onChange={(e) => setMagicCode(e.target.value)}
+                  placeholder="Enter verification code"
+                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-center text-lg font-mono"
+                  autoFocus
+                  required
+                />
+                <button
+                  type="submit"
+                  disabled={!magicCode.trim()}
+                  className="w-full px-4 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                >
+                  Verify Code
+                </button>
+              </form>
+            </div>
+          </motion.div>
+        )}
+
         {/* Loading Bar Container - Hide on error */}
-        {status !== "error" && (
+        {status !== "error" && !showMagicCode && (
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -129,7 +206,7 @@ function LoadingContent() {
         )}
 
         {/* Loading Dots Animation - Hide on error */}
-        {status !== "error" && (
+        {status !== "error" && !showMagicCode && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

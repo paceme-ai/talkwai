@@ -2,7 +2,9 @@
 "use client";
 import Link from "next/link";
 import { useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import Calculator from "@/components/calc";
+import db, { id } from "@/lib/db";
 
 export default function HomePage() {
   return (
@@ -299,15 +301,29 @@ function AudioPlayer() {
 
 // Call form component
 function CallForm() {
+  const [tenant, setTenant] = useState("");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!tenant) {
+      setMessage("Please enter your organization");
+      return;
+    }
+    if (!name) {
+      setMessage("Please enter your full name");
+      return;
+    }
+    if (!email) {
+      setMessage("Please enter your email address");
+      return;
+    }
     if (!phoneNumber) {
       setMessage("Please enter a phone number");
       return;
@@ -317,6 +333,64 @@ function CallForm() {
     setMessage("");
 
     try {
+      // Create tenant and member in InstantDB
+      const tenantId = id();
+      const memberId = id();
+      const taskId = id();
+      
+      // Split name into first and last
+      const nameParts = name.trim().split(' ');
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.slice(1).join(' ') || '';
+
+      // Create tenant
+      await db.transact(
+        db.tx.tenants[tenantId].update({
+          name: tenant,
+          status: 'active',
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+        })
+      );
+
+      // Create member and link to tenant
+      await db.transact(
+        db.tx.members[memberId]
+          .update({
+            firstName,
+            lastName,
+            email,
+            phone: phoneNumber,
+            role: 'owner',
+            status: 'active',
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+          })
+          .link({ tenant: tenantId })
+      );
+
+      // Create initial call task
+      await db.transact(
+        db.tx.tasks[taskId]
+          .update({
+            type: 'call',
+            status: 'in_progress',
+            priority: 'high',
+            fromAddress: 'TalkwAI',
+            toAddress: phoneNumber,
+            subject: 'Initial Demo Call',
+            content: `Demo call for ${tenant} - ${name}`,
+            startedAt: Date.now(),
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+          })
+          .link({ 
+            tenant: tenantId,
+            createdBy: memberId 
+          })
+      );
+
+      // Initiate the actual call
       const response = await fetch("/api/call", {
         method: "POST",
         headers: {
@@ -328,11 +402,19 @@ function CallForm() {
       const data = await response.json();
 
       if (response.ok) {
-        setMessage("Call initiated! You should receive a call shortly.");
-        // Reset form
-        setName("");
-        setEmail("");
-        setPhoneNumber("");
+        // Send magic code for authentication
+        await db.auth.sendMagicCode({ email });
+        
+        // Store member info in localStorage for the loading page
+        localStorage.setItem('pendingMember', JSON.stringify({
+          memberId,
+          tenantId,
+          email,
+          name: `${firstName} ${lastName}`.trim()
+        }));
+        
+        // Route to loading page
+        router.push('/loading');
       } else {
         setMessage(data.error || "Failed to initiate call");
       }
@@ -349,21 +431,28 @@ function CallForm() {
       <form className="flex gap-3" onSubmit={handleSubmit}>
         <input
           type="text"
-          placeholder="Name"
+          placeholder="Your Organization"
+          value={tenant}
+          onChange={(e) => setTenant(e.target.value)}
+          className="flex-1 px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+        />
+        <input
+          type="text"
+          placeholder="Your Full Name"
           value={name}
           onChange={(e) => setName(e.target.value)}
           className="flex-1 px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
         />
         <input
           type="email"
-          placeholder="Email"
+          placeholder="Your Email Address"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           className="flex-1 px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
         />
         <input
           type="tel"
-          placeholder="Phone number"
+          placeholder="Your Phone Number"
           value={phoneNumber}
           onChange={(e) => setPhoneNumber(e.target.value)}
           required
