@@ -275,17 +275,24 @@ function OnboardingBanner({ member }) {
   // Check if Google is connected and mark task as completed
   useEffect(() => {
     if (user?.email && !completedTasks.includes("connect-google")) {
-      // If user has successfully authenticated (they're on the dashboard), 
-      // and they went through Google OAuth, mark Google connection as completed
+      // Check multiple indicators that user came through Google OAuth
       const urlParams = new URLSearchParams(window.location.search);
-      const hasGoogleAuth = urlParams.has('code') || 
-                           localStorage.getItem('google-connected') || 
-                           localStorage.getItem('google-connecting');
+      const hasOAuthCode = urlParams.has('code');
+      const hasInstantOAuthRedirect = urlParams.has('_instant_oauth_redirect');
+      const wasConnectingGoogle = localStorage.getItem('google-connecting');
+      const isAlreadyConnected = localStorage.getItem('google-connected');
       
-      if (hasGoogleAuth) {
+      // If any of these conditions are met, mark Google as connected
+      if (hasOAuthCode || hasInstantOAuthRedirect || wasConnectingGoogle || isAlreadyConnected) {
         setCompletedTasks(prev => [...prev, "connect-google"]);
         localStorage.setItem('google-connected', 'true');
-        localStorage.removeItem('google-connecting'); // Clean up the connecting flag
+        localStorage.removeItem('google-connecting');
+        
+        // Clean up URL parameters to avoid confusion
+        if (hasOAuthCode || hasInstantOAuthRedirect) {
+          const cleanUrl = window.location.pathname;
+          window.history.replaceState({}, document.title, cleanUrl);
+        }
       }
     }
   }, [user, completedTasks]);
