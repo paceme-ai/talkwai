@@ -26,7 +26,7 @@ export default function Header() {
           <Link href="#solution" className="hover:text-emerald-700">
             Casey
           </Link>
-          <Link href="#pricing" className="hover:text-emerald-700">
+          <Link href="/pricing" className="hover:text-emerald-700">
             Pricing
           </Link>
           <Link href="#contact" className="hover:text-emerald-700">
@@ -34,14 +34,11 @@ export default function Header() {
           </Link>
         </nav>
         <div className="flex items-center gap-3">
-          <Link
-            href="#demo"
-            className="text-sm px-3 py-2 rounded-lg border hover:bg-gray-50"
-          >
-            Hear a Demo
+          <Link href="/login" className="text-sm hover:text-emerald-700">
+            Login
           </Link>
           <Link
-            href="#get-started"
+            href="/register"
             className="text-sm px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700"
           >
             Get Started
