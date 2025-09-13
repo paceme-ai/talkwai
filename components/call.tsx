@@ -1,6 +1,6 @@
 "use client";
-import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import db, { id } from "@/lib/db";
 
 export default function CallForm() {
@@ -134,7 +134,10 @@ export default function CallForm() {
 
   return (
     <div>
-      <form className="flex flex-wrap gap-3 justify-center" onSubmit={handleSubmit}>
+      <form
+        className="flex flex-wrap gap-3 justify-center"
+        onSubmit={handleSubmit}
+      >
         <input
           type="text"
           placeholder="Your Organization"

@@ -16,7 +16,10 @@ interface SingleAudioPlayerProps {
   duration: number;
 }
 
-function SingleAudioPlayer({ track, duration: trackDuration }: SingleAudioPlayerProps) {
+function SingleAudioPlayer({
+  track,
+  duration: trackDuration,
+}: SingleAudioPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(trackDuration || 0);
@@ -60,7 +63,7 @@ function SingleAudioPlayer({ track, duration: trackDuration }: SingleAudioPlayer
             {track.title}
           </h4>
         </div>
-        
+
         {/* Playback controls - flexible width, wraps on small screens */}
         <div className="flex-1 min-w-[200px] flex items-center gap-3">
           <button
@@ -77,7 +80,7 @@ function SingleAudioPlayer({ track, duration: trackDuration }: SingleAudioPlayer
             ></div>
           </div>
         </div>
-        
+
         {/* Duration - always 70px wide */}
         <div className="w-[70px] flex-shrink-0 text-right flex items-center justify-end">
           <p className="text-sm text-gray-500">

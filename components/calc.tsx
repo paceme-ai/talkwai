@@ -104,14 +104,14 @@ export default function App() {
               <Currency value={monthlyRecoveredRevenue} />
             </Row>
             <Row label="Monthly cost to get it back">
-              <Currency value={Math.max(missedMinutesPerMonth * 0.5, 600)} />
+              <Currency value={Math.max(missedMinutesPerMonth * 0.5, 695)} />
             </Row>
             <Row label="Return on investment (ROI)" highlight={true}>
               <span className="text-emerald-600">
                 <Number0dp
                   value={
                     monthlyRecoveredRevenue /
-                    Math.max(missedMinutesPerMonth * 0.5, 600)
+                    Math.max(missedMinutesPerMonth * 0.5, 695)
                   }
                 />
                 x

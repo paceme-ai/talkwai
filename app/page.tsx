@@ -1,12 +1,8 @@
 // app/page.js
 "use client";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
-import Calculator from "@/components/calc";
-import CallForm from "@/components/call";
 import AudioPlayer from "@/components/audio-player";
-import db, { id } from "@/lib/db";
+import Calculator from "@/components/calc";
 
 export default function HomePage() {
   return (
@@ -25,8 +21,10 @@ export default function HomePage() {
               TalkwAI helps small businesses handle calls, customers, and chaos
               — so you can focus on the work that matters. Our AI voice agent{" "}
               <strong>TalkwAI</strong> answers, qualifies, and routes every
-              call. Never miss a lead again.{" "}
-              <strong>Listen to TalkwAI in Action:</strong>
+              call. Never miss a lead again.
+            </p>
+            <p className="mt-4 text-lg text-gray-700 font-bold">
+              Listen to TalkwAI in Action:
             </p>
             {/* Audio Player */}
             <div className="mt-4 w-full">
@@ -52,7 +50,7 @@ export default function HomePage() {
             </div>
             <div className="justify-start mt-6 flex flex-col items-start gap-3">
               <p className="text-lg text-gray-700 font-bold">
-                Let it speak for itself.
+                We're going to let it speak for itself.
               </p>
               <Link
                 href="/register"
@@ -111,14 +109,6 @@ export default function HomePage() {
               <li>Syncs to your dashboard, CRM, Slack, email, and SMS.</li>
               <li>Customizable script, hours, and escalation rules.</li>
             </ul>
-            <div className="mt-6">
-              <a
-                href="#how"
-                className="text-emerald-700 font-medium hover:underline"
-              >
-                See how it works →
-              </a>
-            </div>
           </div>
           <div className="rounded-2xl border p-6 bg-gray-50">
             <h3 className="font-semibold text-lg">Why TalkwAI?</h3>
@@ -182,8 +172,6 @@ export default function HomePage() {
         </div>
       </section> */}
 
-
-
       {/* Final CTA */}
       <section id="get-started" className="py-16 border-t">
         <div className="rounded-2xl border p-8 bg-emerald-50">
@@ -195,29 +183,15 @@ export default function HomePage() {
             stop losing leads.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
-            <button
-              type="button"
+            <Link
+              href="/register"
               className="px-5 py-3 rounded-xl border hover:bg-gray-50"
             >
-              Book a Demo
-            </button>
+              Try out TalkwAI
+            </Link>
           </div>
         </div>
       </section>
-
-      {/* Contact */}
-      {/* <section id="contact" className="py-16 border-t">
-        <h2 className="text-2xl md:text-3xl font-semibold">Contact</h2>
-        <p className="mt-2 text-gray-700">Tell us a bit about your business and we’ll reach out fast.</p>
-        <form className="mt-6 grid md:grid-cols-2 gap-4">
-          <input className="border rounded-lg px-4 py-3" placeholder="Full name" />
-          <input className="border rounded-lg px-4 py-3" placeholder="Email" />
-          <input className="border rounded-lg px-4 py-3 md:col-span-2" placeholder="Company name" />
-          <textarea className="border rounded-lg px-4 py-3 md:col-span-2" rows="4" placeholder="What do you need help with?"></textarea>
-          <button type="submit" className="px-5 py-3 rounded-xl bg-black text-white hover:opacity-90 md:col-span-2">Send</button>
-        </form>
-        <p className="mt-3 text-sm text-gray-500">Or email us: hello@talkwai.com</p>
-      </section> */}
     </main>
   );
 }
@@ -245,18 +219,6 @@ function Step({ n, title, text }) {
   );
 }
 
-// function Quote({ text, name, quoteRole }) {
-//   return (
-//     <div className="rounded-2xl border p-6 bg-white">
-//       <p className="text-gray-800">“{text}”</p>
-//       <div className="mt-4 text-sm text-gray-600">
-//         <div className="font-medium">{name}</div>
-//         <div>{quoteRole}</div>
-//       </div>
-//     </div>
-//   );
-// }
-
 function Badge({ children }) {
   return (
     <div className="inline-block rounded-full px-2 py-1 text-base text-center font-medium bg-emerald-600 text-white">
@@ -264,7 +226,5 @@ function Badge({ children }) {
     </div>
   );
 }
-
-
 
 // Call form component

@@ -10,7 +10,7 @@ export default function LoginPage() {
 
   const handleMagicCodeSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!email) {
       setMessage("Please enter your email address");
       return;
@@ -41,7 +41,10 @@ export default function LoginPage() {
       <div className="mb-8 text-center">
         <p className="text-gray-600">
           Don't have an account?{" "}
-          <Link href="/register" className="text-emerald-600 font-semibold hover:underline">
+          <Link
+            href="/register"
+            className="text-emerald-600 font-semibold hover:underline"
+          >
             Sign up here
           </Link>
         </p>
@@ -52,9 +55,7 @@ export default function LoginPage() {
         <h1 className="text-3xl font-semibold text-gray-900">
           Go To Your Dashboard
         </h1>
-        <p className="mt-2 text-gray-600">
-          Choose your preferred login method
-        </p>
+        <p className="mt-2 text-gray-600">Choose your preferred login method</p>
       </div>
 
       {/* Login options */}
@@ -115,7 +116,11 @@ export default function LoginPage() {
             onClick={handleGoogleLogin}
             className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-lg border border-gray-300 hover:bg-gray-50 font-medium"
           >
-            <svg className="w-5 h-5" viewBox="0 0 24 24" aria-label="Google logo">
+            <svg
+              className="w-5 h-5"
+              viewBox="0 0 24 24"
+              aria-label="Google logo"
+            >
               <title>Google logo</title>
               <path
                 fill="#4285F4"
