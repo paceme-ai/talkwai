@@ -16,6 +16,38 @@ const _schema = i.schema({
       name: i.string().indexed(),
       domain: i.string().unique().indexed().optional(),
       status: i.string().indexed(), // active, inactive, suspended
+
+      // Business addresses
+      physicalAddress: i.string().optional(),
+      mailingAddress: i.string().optional(),
+      mailingAddressSameAsPhysical: i.boolean().optional(),
+      legalAddress: i.string().optional(),
+      legalAddressSameAsPhysical: i.boolean().optional(),
+
+      // Business details
+      industry: i.string().indexed().optional(),
+      servicesOffered: i.string().optional(), // JSON array
+      serviceAreaType: i.string().optional(), // city, zip, radius
+      serviceAreaValue: i.string().optional(),
+      serviceRadius: i.number().optional(),
+
+      // Operations
+      hoursOfOperation: i.string().optional(), // JSON object
+      afterHoursHandling: i.string().optional(), // voicemail, forward, emergency
+
+      // Lead capture and appointments
+      leadCaptureFields: i.string().optional(), // JSON array
+      appointmentSlotLength: i.number().optional(),
+      appointmentBuffer: i.number().optional(),
+      calendarIntegration: i.string().optional(),
+
+      // Compliance
+      complianceSettings: i.string().optional(), // JSON object
+
+      // Phone settings
+      preferredAreaCodes: i.string().optional(), // JSON array
+      greetingScript: i.string().optional(),
+
       createdAt: i.number().indexed(),
       updatedAt: i.number().indexed(),
     }),
@@ -25,8 +57,19 @@ const _schema = i.schema({
       lastName: i.string(),
       email: i.string().indexed(),
       phone: i.string().optional(),
+      phoneType: i.string().optional(), // Mobile, Home, Work, Other
       role: i.string().indexed(), // user, manager, owner
       status: i.string().indexed(), // active, inactive
+
+      // Additional member fields
+      title: i.string().optional(), // job title/position
+      phone2: i.string().optional(),
+      phone2Type: i.string().optional(), // Mobile, Home, Work, Other
+      phone3: i.string().optional(),
+      phone3Type: i.string().optional(), // Mobile, Home, Work, Other
+      notificationPreferences: i.string().optional(), // JSON object: {text: bool, email: bool, app: bool}
+      escalationInstructions: i.string().optional(),
+
       createdAt: i.number().indexed(),
       updatedAt: i.number().indexed(),
     }),
@@ -61,7 +104,7 @@ const _schema = i.schema({
       subject: i.string().optional(), // for emails or task description
       content: i.string().optional(), // task content/body
       metadata: i.string().optional(), // JSON string for additional data
-      
+
       // Call-specific metadata fields
       callId: i.string().indexed().optional(), // Cartesia call ID for voice calls
       callStatus: i.string().indexed().optional(), // dialing, in_progress, completed, failed, no_answer
@@ -76,7 +119,7 @@ const _schema = i.schema({
       callSentiment: i.string().optional(), // positive, negative, neutral
       callSuccessful: i.boolean().optional(), // whether call achieved its goal
       callCost: i.number().optional(), // cost of the call in cents
-      
+
       scheduledAt: i.number().indexed().optional(),
       startedAt: i.number().indexed().optional(),
       completedAt: i.number().indexed().optional(),

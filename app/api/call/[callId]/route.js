@@ -1,12 +1,12 @@
-import { NextResponse } from "next/server";
 import { init } from "@instantdb/admin";
+import { NextResponse } from "next/server";
 
 const db = init({
   appId: process.env.NEXT_PUBLIC_INSTANT_APP_ID,
   adminToken: process.env.INSTANT_ADMIN_TOKEN,
 });
 
-export async function GET(request, { params }) {
+export async function GET(_request, { params }) {
   try {
     const { callId } = await params;
 
@@ -27,14 +27,17 @@ export async function GET(request, { params }) {
     }
 
     // Get call information using Cartesia REST API
-    const response = await fetch(`https://api.cartesia.ai/agents/calls/${callId}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${cartesiaApiKey}`,
-        'Cartesia-Version': '2024-11-13',
-        'Content-Type': 'application/json',
+    const response = await fetch(
+      `https://api.cartesia.ai/agents/calls/${callId}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${cartesiaApiKey}`,
+          "Cartesia-Version": "2024-11-13",
+          "Content-Type": "application/json",
+        },
       },
-    });
+    );
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -90,11 +93,11 @@ export async function GET(request, { params }) {
         }
 
         // Update task status based on call status
-        if (data.status === 'completed' || data.status === 'ended') {
-          updateData.status = 'completed';
+        if (data.status === "completed" || data.status === "ended") {
+          updateData.status = "completed";
           updateData.completedAt = Date.now();
-        } else if (data.status === 'failed' || data.status === 'error') {
-          updateData.status = 'failed';
+        } else if (data.status === "failed" || data.status === "error") {
+          updateData.status = "failed";
         }
 
         // Find and update the task with this callId
@@ -106,9 +109,7 @@ export async function GET(request, { params }) {
 
         if (tasks.tasks && tasks.tasks.length > 0) {
           const taskId = tasks.tasks[0].id;
-          await db.transact([
-            db.tx.tasks[taskId].update(updateData),
-          ]);
+          await db.transact([db.tx.tasks[taskId].update(updateData)]);
         }
       }
     } catch (dbError) {
@@ -122,7 +123,7 @@ export async function GET(request, { params }) {
     });
   } catch (error) {
     console.error("API route error:", error);
-    
+
     // Handle Cartesia-specific errors
     if (error.statusCode) {
       return NextResponse.json(
@@ -130,7 +131,7 @@ export async function GET(request, { params }) {
         { status: error.statusCode },
       );
     }
-    
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

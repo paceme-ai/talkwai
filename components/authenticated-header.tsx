@@ -2,12 +2,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import db from "@/lib/db";
 import { useRouter } from "next/navigation";
+import db from "@/lib/db";
 
 export default function AuthenticatedHeader() {
   const router = useRouter();
-  const user = db.useUser();
+  // const user = db.useUser();
 
   const handleSignOut = () => {
     db.auth.signOut();

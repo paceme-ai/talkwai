@@ -1,12 +1,12 @@
-import { NextResponse } from "next/server";
 import { init } from "@instantdb/admin";
+import { NextResponse } from "next/server";
 
 const db = init({
   appId: process.env.NEXT_PUBLIC_INSTANT_APP_ID,
   adminToken: process.env.INSTANT_ADMIN_TOKEN,
 });
 
-export async function GET(request, { params }) {
+export async function GET(_request, { params }) {
   try {
     const { callId } = await params;
 
@@ -49,7 +49,7 @@ export async function GET(request, { params }) {
 
     // Get the audio data as array buffer
     const audioData = await response.arrayBuffer();
-    
+
     // Convert to File object for InstantDB storage
     const audioFile = new File([audioData], `call-${callId}.wav`, {
       type: "audio/wav",

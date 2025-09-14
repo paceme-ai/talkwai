@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
 import { init } from "@instantdb/admin";
+import { NextResponse } from "next/server";
 
 const db = init({
   appId: process.env.NEXT_PUBLIC_INSTANT_APP_ID,
@@ -77,13 +77,13 @@ export async function POST(request) {
             subject: "Outbound call",
             content: `Call initiated to ${phoneNumber}`,
             metadata: JSON.stringify(data), // Store full Cartesia response
-            
+
             // Call-specific metadata
             callId: callId,
             callStatus: "dialing", // Initial status when call is created
             callDirection: "outbound",
             callStartTime: now, // When call was initiated
-            
+
             startedAt: now,
             createdAt: now,
             updatedAt: now,

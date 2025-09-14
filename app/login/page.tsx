@@ -12,20 +12,20 @@ export default function LoginPage() {
 
   const handleGoogleLogin = () => {
     const hostname = window.location.hostname;
-    const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
-    const redirectURL = isLocalhost 
-      ? 'http://localhost:3000/dash' 
+    const isLocalhost = hostname === "localhost" || hostname === "127.0.0.1";
+    const redirectURL = isLocalhost
+      ? "http://localhost:3000/dash"
       : `${window.location.origin}/dash`;
-    
-    console.log('Hostname:', hostname);
-    console.log('Is localhost:', isLocalhost);
-    console.log('Redirect URL:', redirectURL);
-    
+
+    console.log("Hostname:", hostname);
+    console.log("Is localhost:", isLocalhost);
+    console.log("Redirect URL:", redirectURL);
+
     const url = db.auth.createAuthorizationURL({
       clientName: "google-web",
       redirectURL: redirectURL,
     });
-    
+
     window.location.href = url;
   };
 

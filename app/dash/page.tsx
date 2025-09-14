@@ -1,14 +1,62 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import Link from "next/link";
-import db from "@/lib/db";
 import AuthenticatedHeader from "@/components/authenticated-header";
+import PhoneInput from "@/components/phone-input";
+import db from "@/lib/db";
 
 // Create a room for collaboration
 const room = db.room("tenant", "main");
+
+// Industry categories for organization profile
+const INDUSTRY_CATEGORIES = [
+  "Accounting & Finance",
+  "Advertising & Marketing",
+  "Agriculture & Farming",
+  "Architecture & Design",
+  "Automotive",
+  "Banking & Financial Services",
+  "Beauty & Personal Care",
+  "Business Services",
+  "Construction & Contracting",
+  "Consulting",
+  "Dental & Orthodontics",
+  "E-commerce & Retail",
+  "Education & Training",
+  "Engineering",
+  "Entertainment & Events",
+  "Environmental Services",
+  "Fashion & Apparel",
+  "Food & Beverage",
+  "Government & Public Sector",
+  "Healthcare & Medical",
+  "Home Services & Maintenance",
+  "Hospitality & Tourism",
+  "Human Resources",
+  "Information Technology",
+  "Insurance",
+  "Legal Services",
+  "Manufacturing",
+  "Media & Communications",
+  "Non-Profit & Charity",
+  "Pet Care & Veterinary",
+  "Photography & Videography",
+  "Real Estate",
+  "Recreation & Fitness",
+  "Religious Organizations",
+  "Repair & Maintenance",
+  "Research & Development",
+  "Security Services",
+  "Software & Technology",
+  "Transportation & Logistics",
+  "Travel & Tourism",
+  "Utilities & Energy",
+  "Wellness & Health",
+  "Other",
+];
 
 function Dash() {
   const router = useRouter();
@@ -100,39 +148,41 @@ function Dash() {
     <>
       <AuthenticatedHeader />
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-6 sm:mb-8"
-        >
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                Welcome back{member?.firstName ? `, ${member.firstName}` : ""}!
-              </h1>
-              <p className="text-gray-600 mt-1 sm:mt-2 text-sm sm:text-base">
-                {member?.tenant?.name || "Your Organization"} Dashboard
-              </p>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+          {/* Header */}
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6 sm:mb-8"
+          >
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
+              <div className="flex items-center space-x-2">
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+                  Dashboard
+                </h1>
+                <p className="text-gray-600 mt-1 sm:mt-2 text-sm sm:text-base">
+                  {member?.tenant?.name || "Your Organization"}
+                </p>
+              </div>
+              <div className="flex items-center space-x-3 sm:space-x-4">
+                <OnlineUsers />
+              </div>
             </div>
-            <div className="flex items-center space-x-3 sm:space-x-4">
-              <OnlineUsers />
-            </div>
-          </div>
-        </motion.div>
+          </motion.div>
 
-        {/* Email Verification Banner */}
-        {!emailVerified && <EmailVerificationBanner />}
+          {/* Email Verification Banner */}
+          {!emailVerified && <EmailVerificationBanner />}
 
-        {/* Onboarding Banner */}
-        {showOnboarding && <OnboardingBanner member={member} />}
+          {/* Onboarding Banner */}
+          {showOnboarding && <OnboardingBanner member={member} />}
 
-        {/* Tasks Table */}
-        <TestCallSection />
-        <TasksTable tasks={tasks} member={member} />
+          {/* Profile Sections */}
+          <ProfileSections member={member} tenant={member?.tenant} />
+          <TestCallSection member={member} />
+          {/* Tasks Table */}
+          <TasksTable tasks={tasks} member={member} />
+        </div>
       </div>
-    </div>
     </>
   );
 }
@@ -178,7 +228,7 @@ function EmailVerificationBanner() {
       // This would typically call an API endpoint to verify the code
       console.log("Verifying code:", verificationCode);
       setMessage("Verification successful!");
-    } catch (error) {
+    } catch (_error) {
       setMessage("Invalid verification code. Please try again.");
     } finally {
       setIsLoading(false);
@@ -194,7 +244,7 @@ function EmailVerificationBanner() {
       // This would typically call an API endpoint to resend the code
       console.log("Resending verification code to:", user?.email);
       setMessage("Verification code sent to your email!");
-    } catch (error) {
+    } catch (_error) {
       setMessage("Failed to resend code. Please try again.");
     } finally {
       setIsLoading(false);
@@ -209,20 +259,33 @@ function EmailVerificationBanner() {
     >
       <div className="flex items-start space-x-3">
         <div className="flex-shrink-0">
-          <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor" aria-label="Warning icon">
-             <title>Warning icon</title>
-             <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-           </svg>
+          <svg
+            className="h-5 w-5 text-yellow-400"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+            aria-label="Warning icon"
+          >
+            <title>Warning icon</title>
+            <path
+              fillRule="evenodd"
+              d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+              clipRule="evenodd"
+            />
+          </svg>
         </div>
         <div className="flex-1">
           <h3 className="text-sm font-medium text-yellow-800">
             Please verify your email address
           </h3>
           <p className="mt-1 text-sm text-yellow-700">
-            We sent a verification code to {user?.email}. Enter it below to complete your account setup.
+            We sent a verification code to {user?.email}. Enter it below to
+            complete your account setup.
           </p>
-          
-          <form onSubmit={handleVerifyCode} className="mt-4 flex flex-col sm:flex-row gap-3">
+
+          <form
+            onSubmit={handleVerifyCode}
+            className="mt-4 flex flex-col sm:flex-row gap-3"
+          >
             <input
               type="text"
               value={verificationCode}
@@ -249,13 +312,15 @@ function EmailVerificationBanner() {
               </button>
             </div>
           </form>
-          
+
           {message && (
-            <p className={`mt-2 text-sm ${
-              message.includes("successful") || message.includes("sent") 
-                ? "text-green-600" 
-                : "text-red-600"
-            }`}>
+            <p
+              className={`mt-2 text-sm ${
+                message.includes("successful") || message.includes("sent")
+                  ? "text-green-600"
+                  : "text-red-600"
+              }`}
+            >
               {message}
             </p>
           )}
@@ -278,17 +343,22 @@ function OnboardingBanner({ member }) {
     if (user?.email && !completedTasks.includes("connect-google")) {
       // Check multiple indicators that user came through Google OAuth
       const urlParams = new URLSearchParams(window.location.search);
-      const hasOAuthCode = urlParams.has('code');
-      const hasInstantOAuthRedirect = urlParams.has('_instant_oauth_redirect');
-      const wasConnectingGoogle = localStorage.getItem('google-connecting');
-      const isAlreadyConnected = localStorage.getItem('google-connected');
-      
+      const hasOAuthCode = urlParams.has("code");
+      const hasInstantOAuthRedirect = urlParams.has("_instant_oauth_redirect");
+      const wasConnectingGoogle = localStorage.getItem("google-connecting");
+      const isAlreadyConnected = localStorage.getItem("google-connected");
+
       // If any of these conditions are met, mark Google as connected
-      if (hasOAuthCode || hasInstantOAuthRedirect || wasConnectingGoogle || isAlreadyConnected) {
-        setCompletedTasks(prev => [...prev, "connect-google"]);
-        localStorage.setItem('google-connected', 'true');
-        localStorage.removeItem('google-connecting');
-        
+      if (
+        hasOAuthCode ||
+        hasInstantOAuthRedirect ||
+        wasConnectingGoogle ||
+        isAlreadyConnected
+      ) {
+        setCompletedTasks((prev) => [...prev, "connect-google"]);
+        localStorage.setItem("google-connected", "true");
+        localStorage.removeItem("google-connecting");
+
         // Clean up URL parameters to avoid confusion
         if (hasOAuthCode || hasInstantOAuthRedirect) {
           const cleanUrl = window.location.pathname;
@@ -307,11 +377,14 @@ function OnboardingBanner({ member }) {
   };
 
   // Determine redirect URL based on environment
-  const isLocalhost = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
-  const googleRedirectURL = isLocalhost 
-    ? `http://localhost:${typeof window !== 'undefined' ? window.location.port || '3000' : '3000'}/dash`
-    : `${typeof window !== 'undefined' ? window.location.origin : ''}/dash`;
-  
+  const isLocalhost =
+    typeof window !== "undefined" &&
+    (window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1");
+  const googleRedirectURL = isLocalhost
+    ? `http://localhost:${typeof window !== "undefined" ? window.location.port || "3000" : "3000"}/dash`
+    : `${typeof window !== "undefined" ? window.location.origin : ""}/dash`;
+
   const googleAuthURL = db.auth.createAuthorizationURL({
     clientName: "google-web",
     redirectURL: googleRedirectURL,
@@ -325,7 +398,7 @@ function OnboardingBanner({ member }) {
         member?.emailVerified || completedTasks.includes("verify-email"),
       action: handleVerifyEmail,
       buttonText: "Verify",
-      type: "button"
+      type: "button",
     },
     {
       id: "connect-google",
@@ -333,7 +406,7 @@ function OnboardingBanner({ member }) {
       completed: completedTasks.includes("connect-google"),
       url: googleAuthURL,
       buttonText: isConnectingGoogle ? "Connecting..." : "Connect",
-      type: "link"
+      type: "link",
     },
   ];
 
@@ -355,7 +428,7 @@ function OnboardingBanner({ member }) {
               fill="currentColor"
               viewBox="0 0 20 20"
             >
-              <title>Checkmark</title>
+              <title>Checkmark icon</title>
               <path
                 fillRule="evenodd"
                 d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
@@ -398,6 +471,7 @@ function OnboardingBanner({ member }) {
                         className="w-2 h-2 text-white"
                         fill="currentColor"
                         viewBox="0 0 20 20"
+                        aria-label="Completed"
                       >
                         <title>Completed</title>
                         <path
@@ -418,15 +492,15 @@ function OnboardingBanner({ member }) {
                     {task.label}
                   </span>
                 </div>
-                {!task.completed && (
-                  task.type === "link" ? (
+                {!task.completed &&
+                  (task.type === "link" ? (
                     <Link
                       href={task.url}
                       className="text-xs bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 inline-block text-center"
                       onClick={() => {
                         if (task.id === "connect-google") {
                           setIsConnectingGoogle(true);
-                          localStorage.setItem('google-connecting', 'true');
+                          localStorage.setItem("google-connecting", "true");
                         }
                       }}
                     >
@@ -443,8 +517,7 @@ function OnboardingBanner({ member }) {
                     >
                       {task.buttonText}
                     </button>
-                  )
-                )}
+                  ))}
               </div>
             ))}
           </div>
@@ -454,8 +527,13 @@ function OnboardingBanner({ member }) {
           onClick={() => setIsVisible(false)}
           className="text-blue-400 hover:text-blue-600 ml-4"
         >
-          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-            <title>Close</title>
+          <svg
+            className="w-4 h-4"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+            aria-label="Close"
+          >
+            <title>Close icon</title>
             <path
               fillRule="evenodd"
               d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
@@ -468,35 +546,943 @@ function OnboardingBanner({ member }) {
   );
 }
 
+// ProfileSections Component
+function ProfileSections({ member, tenant }) {
+  const [editingOrg, setEditingOrg] = useState(false);
+  const [editingMember, setEditingMember] = useState(false);
+  const [showOrgProfile, setShowOrgProfile] = useState(true);
+  const [showMemberProfile, setShowMemberProfile] = useState(true);
+  const [orgData, setOrgData] = useState({
+    name: tenant?.name || "",
+    physicalAddress: tenant?.physicalAddress || "",
+    mailingAddress: tenant?.mailingAddress || "",
+    mailingAddressSameAsPhysical: tenant?.mailingAddressSameAsPhysical || false,
+    legalAddress: tenant?.legalAddress || "",
+    legalAddressSameAsPhysical: tenant?.legalAddressSameAsPhysical || false,
+    industry: tenant?.industry || "",
+    servicesOffered: tenant?.servicesOffered || "",
+    serviceAreaType: tenant?.serviceAreaType || "city", // city, zip, radius
+    serviceAreaValue: tenant?.serviceAreaValue || "",
+    serviceRadius: tenant?.serviceRadius || 25,
+    hoursOfOperation: tenant?.hoursOfOperation
+      ? JSON.parse(tenant.hoursOfOperation)
+      : {
+          monday: { open: "09:00", close: "17:00", closed: false },
+          tuesday: { open: "09:00", close: "17:00", closed: false },
+          wednesday: { open: "09:00", close: "17:00", closed: false },
+          thursday: { open: "09:00", close: "17:00", closed: false },
+          friday: { open: "09:00", close: "17:00", closed: false },
+          saturday: { open: "09:00", close: "17:00", closed: true },
+          sunday: { open: "09:00", close: "17:00", closed: true },
+        },
+    afterHoursHandling: tenant?.afterHoursHandling || "voicemail", // voicemail, forward, emergency
+    leadCaptureFields: tenant?.leadCaptureFields
+      ? JSON.parse(tenant.leadCaptureFields)
+      : ["name", "phone", "email", "service"],
+    appointmentSlotLength: tenant?.appointmentSlotLength || 30,
+    appointmentBuffer: tenant?.appointmentBuffer || 15,
+    calendarIntegration: tenant?.calendarIntegration || "none",
+    complianceSettings: tenant?.complianceSettings
+      ? JSON.parse(tenant.complianceSettings)
+      : {
+          callRecordingConsent: false,
+          hipaaCompliant: false,
+          gdprCompliant: false,
+        },
+    preferredAreaCodes: tenant?.preferredAreaCodes
+      ? JSON.parse(tenant.preferredAreaCodes)
+      : [],
+    greetingScript: tenant?.greetingScript || "",
+  });
+  const [memberData, setMemberData] = useState({
+    firstName: member?.firstName || "",
+    lastName: member?.lastName || "",
+    email: member?.email || "",
+    phone: member?.phone || "",
+    phoneType: member?.phoneType || "Mobile",
+    title: member?.title || "",
+    phone2: member?.phone2 || "",
+    phone2Type: member?.phone2Type || "Mobile",
+    phone3: member?.phone3 || "",
+    phone3Type: member?.phone3Type || "Mobile",
+    notificationPreferences: member?.notificationPreferences
+      ? JSON.parse(member.notificationPreferences)
+      : {
+          text: true,
+          email: true,
+          app: true,
+        },
+    escalationInstructions: member?.escalationInstructions || "",
+  });
+
+  const handleOrgSave = async () => {
+    try {
+      await db.transact(
+        db.tx.tenants[tenant.id].update({
+          name: orgData.name,
+          physicalAddress: orgData.physicalAddress,
+          mailingAddress: orgData.mailingAddress,
+          mailingAddressSameAsPhysical: orgData.mailingAddressSameAsPhysical,
+          legalAddress: orgData.legalAddress,
+          legalAddressSameAsPhysical: orgData.legalAddressSameAsPhysical,
+          industry: orgData.industry,
+          servicesOffered: orgData.servicesOffered,
+          serviceAreaType: orgData.serviceAreaType,
+          serviceAreaValue: orgData.serviceAreaValue,
+          serviceRadius: orgData.serviceRadius,
+          hoursOfOperation: JSON.stringify(orgData.hoursOfOperation),
+          afterHoursHandling: orgData.afterHoursHandling,
+          leadCaptureFields: JSON.stringify(orgData.leadCaptureFields),
+          appointmentSlotLength: orgData.appointmentSlotLength,
+          appointmentBuffer: orgData.appointmentBuffer,
+          calendarIntegration: orgData.calendarIntegration,
+          complianceSettings: JSON.stringify(orgData.complianceSettings),
+          preferredAreaCodes: JSON.stringify(orgData.preferredAreaCodes),
+          greetingScript: orgData.greetingScript,
+        }),
+      );
+      setEditingOrg(false);
+    } catch (error) {
+      console.error("Error updating organization:", error);
+    }
+  };
+
+  const handleMemberSave = async () => {
+    try {
+      await db.transact(
+        db.tx.members[member.id].update({
+          firstName: memberData.firstName,
+          lastName: memberData.lastName,
+          email: memberData.email,
+          phone: memberData.phone,
+          phoneType: memberData.phoneType,
+          title: memberData.title,
+          phone2: memberData.phone2,
+          phone2Type: memberData.phone2Type,
+          phone3: memberData.phone3,
+          phone3Type: memberData.phone3Type,
+          notificationPreferences: JSON.stringify(
+            memberData.notificationPreferences,
+          ),
+          escalationInstructions: memberData.escalationInstructions,
+        }),
+      );
+      setEditingMember(false);
+    } catch (error) {
+      console.error("Error updating member:", error);
+    }
+  };
+
+  const handleOrgCancel = () => {
+    setOrgData({
+      name: tenant?.name || "",
+      physicalAddress: tenant?.physicalAddress || "",
+      mailingAddress: tenant?.mailingAddress || "",
+      mailingAddressSameAsPhysical:
+        tenant?.mailingAddressSameAsPhysical || false,
+      legalAddress: tenant?.legalAddress || "",
+      legalAddressSameAsPhysical: tenant?.legalAddressSameAsPhysical || false,
+      industry: tenant?.industry || "",
+      servicesOffered: tenant?.servicesOffered || "",
+      serviceAreaType: tenant?.serviceAreaType || "city",
+      serviceAreaValue: tenant?.serviceAreaValue || "",
+      serviceRadius: tenant?.serviceRadius || 25,
+      hoursOfOperation: tenant?.hoursOfOperation
+        ? JSON.parse(tenant.hoursOfOperation)
+        : {
+            monday: { open: "09:00", close: "17:00", closed: false },
+            tuesday: { open: "09:00", close: "17:00", closed: false },
+            wednesday: { open: "09:00", close: "17:00", closed: false },
+            thursday: { open: "09:00", close: "17:00", closed: false },
+            friday: { open: "09:00", close: "17:00", closed: false },
+            saturday: { open: "09:00", close: "17:00", closed: true },
+            sunday: { open: "09:00", close: "17:00", closed: true },
+          },
+      afterHoursHandling: tenant?.afterHoursHandling || "voicemail",
+      leadCaptureFields: tenant?.leadCaptureFields
+        ? JSON.parse(tenant.leadCaptureFields)
+        : ["name", "phone", "email", "service"],
+      appointmentSlotLength: tenant?.appointmentSlotLength || 30,
+      appointmentBuffer: tenant?.appointmentBuffer || 15,
+      calendarIntegration: tenant?.calendarIntegration || "none",
+      complianceSettings: tenant?.complianceSettings
+        ? JSON.parse(tenant.complianceSettings)
+        : {
+            callRecordingConsent: false,
+            hipaaCompliant: false,
+            gdprCompliant: false,
+          },
+      preferredAreaCodes: tenant?.preferredAreaCodes
+        ? JSON.parse(tenant.preferredAreaCodes)
+        : [],
+      greetingScript: tenant?.greetingScript || "",
+    });
+    setEditingOrg(false);
+  };
+
+  const handleMemberCancel = () => {
+    setMemberData({
+      firstName: member?.firstName || "",
+      lastName: member?.lastName || "",
+      email: member?.email || "",
+      phone: member?.phone || "",
+      phoneType: member?.phoneType || "Mobile",
+      title: member?.title || "",
+      phone2: member?.phone2 || "",
+      phone2Type: member?.phone2Type || "Mobile",
+      phone3: member?.phone3 || "",
+      phone3Type: member?.phone3Type || "Mobile",
+      notificationPreferences: member?.notificationPreferences
+        ? JSON.parse(member.notificationPreferences)
+        : {
+            text: true,
+            email: true,
+            app: true,
+          },
+      escalationInstructions: member?.escalationInstructions || "",
+    });
+    setEditingMember(false);
+  };
+
+  return (
+    <div className="space-y-4 mb-6">
+      {/* Organization Profile */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-white rounded-xl shadow-sm border border-gray-200 p-6"
+      >
+        <div className="flex items-center justify-between mb-4">
+          <button 
+            type="button"
+            className="flex items-center space-x-2 cursor-pointer hover:text-blue-600 bg-transparent border-none p-0"
+            onClick={() => setShowOrgProfile(!showOrgProfile)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                setShowOrgProfile(!showOrgProfile);
+              }
+            }}
+            aria-label={`${showOrgProfile ? 'Collapse' : 'Expand'} organization profile`}
+          >
+            <svg
+              className="w-5 h-5 text-gray-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <title>Business icon</title>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+              />
+            </svg>
+            <h3 className="text-lg font-semibold text-gray-900">
+              {tenant?.name || "Organization"}
+            </h3>
+            <svg
+              className={`w-4 h-4 text-gray-400 transition-transform ${showOrgProfile ? 'rotate-90' : ''}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <title>Expand/collapse arrow</title>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 5l7 7-7 7"
+              />
+            </svg>
+          </button>
+          {!editingOrg ? (
+            <button
+              type="button"
+              onClick={() => setEditingOrg(true)}
+              className="text-gray-400 hover:text-gray-600"
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                aria-label="Edit organization"
+              >
+                <title>Edit organization</title>
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                />
+              </svg>
+            </button>
+          ) : (
+            <div className="flex space-x-2">
+              <button
+                type="button"
+                onClick={handleOrgSave}
+                className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+              >
+                Save
+              </button>
+              <button
+                type="button"
+                onClick={handleOrgCancel}
+                className="px-3 py-1 bg-gray-300 text-gray-700 text-sm rounded hover:bg-gray-400"
+              >
+                Cancel
+              </button>
+            </div>
+          )}
+        </div>
+
+        {showOrgProfile && (
+        <div className="space-y-6">
+          {/* Basic Information - Row 1: 3 columns */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label
+                htmlFor="org-industry"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Industry Category
+              </label>
+              {editingOrg ? (
+                <select
+                  id="org-industry"
+                  value={orgData.industry}
+                  onChange={(e) =>
+                    setOrgData({ ...orgData, industry: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Select an industry...</option>
+                  {INDUSTRY_CATEGORIES.map((category) => (
+                    <option key={category} value={category}>
+                      {category}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <p className="text-gray-900">{tenant?.industry || "Not set"}</p>
+              )}
+            </div>
+            <div>
+              <label
+                htmlFor="services-offered"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Services Offered
+              </label>
+              {editingOrg ? (
+                <input
+                  id="services-offered"
+                  type="text"
+                  value={orgData.servicesOffered}
+                  onChange={(e) =>
+                    setOrgData({
+                      ...orgData,
+                      servicesOffered: e.target.value,
+                    })
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter services separated by commas"
+                />
+              ) : (
+                <p className="text-gray-900">
+                  {tenant?.servicesOffered || "Not set"}
+                </p>
+              )}
+            </div>
+            <div className="">
+              <label
+                htmlFor="service-area"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Service Area
+              </label>
+              {editingOrg ? (
+                <textarea
+                  id="service-area"
+                  value={orgData.serviceAreaValue}
+                  onChange={(e) =>
+                    setOrgData({
+                      ...orgData,
+                      serviceAreaValue: e.target.value,
+                    })
+                  }
+                  rows={2}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Cities, zip codes, or radius"
+                />
+              ) : (
+                <p className="text-gray-900">
+                  {tenant?.serviceAreaValue || "Not set"}
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Business Addresses */}
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label
+                    htmlFor="physical-address"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Physical Address
+                  </label>
+                  {editingOrg ? (
+                    <textarea
+                      id="physical-address"
+                      value={orgData.physicalAddress}
+                      onChange={(e) =>
+                        setOrgData({
+                          ...orgData,
+                          physicalAddress: e.target.value,
+                        })
+                      }
+                      rows={2}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Street address, city, state, zip"
+                    />
+                  ) : (
+                    <p className="text-gray-900">
+                      {tenant?.physicalAddress || "Not set"}
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <div className="flex items-center mb-1">
+                    {editingOrg && (
+                      <input
+                        type="checkbox"
+                        id="same-mailing"
+                        checked={orgData.mailingAddressSameAsPhysical}
+                        onChange={(e) =>
+                          setOrgData({
+                            ...orgData,
+                            mailingAddressSameAsPhysical: e.target.checked,
+                          })
+                        }
+                        className="mr-2"
+                      />
+                    )}
+                    <label
+                      htmlFor="mailing-address"
+                      className="block text-sm font-medium text-gray-700"
+                    >
+                      Mailing Address {editingOrg && "(same as physical)"}
+                    </label>
+                  </div>
+                  {editingOrg ? (
+                    <textarea
+                      id="mailing-address"
+                      value={
+                        orgData.mailingAddressSameAsPhysical
+                          ? orgData.physicalAddress
+                          : orgData.mailingAddress
+                      }
+                      onChange={(e) =>
+                        setOrgData({
+                          ...orgData,
+                          mailingAddress: e.target.value,
+                        })
+                      }
+                      disabled={orgData.mailingAddressSameAsPhysical}
+                      rows={2}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                      placeholder="Street address, city, state, zip"
+                    />
+                  ) : (
+                    <p className="text-gray-900">
+                      {tenant?.mailingAddress ||
+                        tenant?.physicalAddress ||
+                        "Not set"}
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <div className="flex items-center mb-1">
+                    {editingOrg && (
+                      <input
+                        type="checkbox"
+                        id="same-legal"
+                        checked={orgData.legalAddressSameAsPhysical}
+                        onChange={(e) =>
+                          setOrgData({
+                            ...orgData,
+                            legalAddressSameAsPhysical: e.target.checked,
+                          })
+                        }
+                        className="mr-2"
+                      />
+                    )}
+                    <label
+                      htmlFor="legal-address"
+                      className="block text-sm font-medium text-gray-700"
+                    >
+                      Legal Address {editingOrg && "(same as physical)"}
+                    </label>
+                  </div>
+                  {editingOrg ? (
+                    <textarea
+                      id="legal-address"
+                      value={
+                        orgData.legalAddressSameAsPhysical
+                          ? orgData.physicalAddress
+                          : orgData.legalAddress
+                      }
+                      onChange={(e) =>
+                        setOrgData({ ...orgData, legalAddress: e.target.value })
+                      }
+                      disabled={orgData.legalAddressSameAsPhysical}
+                      rows={2}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                      placeholder="Street address, city, state, zip"
+                    />
+                  ) : (
+                    <p className="text-gray-900">
+                      {tenant?.legalAddress ||
+                        tenant?.physicalAddress ||
+                        "Not set"}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        )}
+      </motion.div>
+
+      {/* Member Profile */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+        className="bg-white rounded-xl shadow-sm border border-gray-200 p-6"
+      >
+        <div className="flex items-center justify-between mb-4">
+          <button 
+            type="button"
+            className="flex items-center space-x-2 cursor-pointer hover:text-blue-600 bg-transparent border-none p-0"
+            onClick={() => setShowMemberProfile(!showMemberProfile)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                setShowMemberProfile(!showMemberProfile);
+              }
+            }}
+            aria-label={`${showMemberProfile ? 'Collapse' : 'Expand'} member profile`}
+          >
+            <svg
+              className="w-5 h-5 text-gray-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <title>Person icon</title>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+              />
+            </svg>
+            <h3 className="text-lg font-semibold text-gray-900">
+              {member?.firstName && member?.lastName 
+                ? `${member.firstName} ${member.lastName}` 
+                : "Member"}
+            </h3>
+            <svg
+              className={`w-4 h-4 text-gray-400 transition-transform ${showMemberProfile ? 'rotate-90' : ''}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <title>Expand/collapse arrow</title>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 5l7 7-7 7"
+              />
+            </svg>
+          </button>
+          {!editingMember ? (
+            <button
+              type="button"
+              onClick={() => setEditingMember(true)}
+              className="text-gray-400 hover:text-gray-600"
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                aria-label="Edit member"
+              >
+                <title>Edit member</title>
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                />
+              </svg>
+            </button>
+          ) : (
+            <div className="flex space-x-2">
+              <button
+                type="button"
+                onClick={handleMemberSave}
+                className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+              >
+                Save
+              </button>
+              <button
+                type="button"
+                onClick={handleMemberCancel}
+                className="px-3 py-1 bg-gray-300 text-gray-700 text-sm rounded hover:bg-gray-400"
+              >
+                Cancel
+              </button>
+            </div>
+          )}
+        </div>
+
+        {showMemberProfile && (
+        <div>
+        {/* Row 1: 4 columns - Role/Title, Email, Notification, Escalation */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div>
+            <label
+              htmlFor="member-title"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Role/Title
+            </label>
+            {editingMember ? (
+              <input
+                id="member-title"
+                type="text"
+                value={memberData.title}
+                onChange={(e) =>
+                  setMemberData({ ...memberData, title: e.target.value })
+                }
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter role/title"
+              />
+            ) : (
+              <p className="text-gray-900">{member?.title || "Not set"}</p>
+            )}
+          </div>
+          <div>
+            <label
+              htmlFor="member-email"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Email
+            </label>
+            {editingMember ? (
+              <input
+                id="member-email"
+                type="email"
+                value={memberData.email}
+                onChange={(e) =>
+                  setMemberData({ ...memberData, email: e.target.value })
+                }
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            ) : (
+              <p className="text-gray-900">{member?.email || "Not set"}</p>
+            )}
+          </div>
+          <div>
+            <label
+              htmlFor="member-notification"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Notification
+            </label>
+            {editingMember ? (
+              <div className="flex space-x-4">
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={memberData.notificationPreferences.text}
+                    onChange={(e) =>
+                      setMemberData({
+                        ...memberData,
+                        notificationPreferences: {
+                          ...memberData.notificationPreferences,
+                          text: e.target.checked,
+                        },
+                      })
+                    }
+                    className="mr-1"
+                  />
+                  <span className="text-sm text-gray-700">Text</span>
+                </label>
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={memberData.notificationPreferences.email}
+                    onChange={(e) =>
+                      setMemberData({
+                        ...memberData,
+                        notificationPreferences: {
+                          ...memberData.notificationPreferences,
+                          email: e.target.checked,
+                        },
+                      })
+                    }
+                    className="mr-1"
+                  />
+                  <span className="text-sm text-gray-700">Email</span>
+                </label>
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={memberData.notificationPreferences.app}
+                    onChange={(e) =>
+                      setMemberData({
+                        ...memberData,
+                        notificationPreferences: {
+                          ...memberData.notificationPreferences,
+                          app: e.target.checked,
+                        },
+                      })
+                    }
+                    className="mr-1"
+                  />
+                  <span className="text-sm text-gray-700">App</span>
+                </label>
+              </div>
+            ) : (
+              <div className="flex space-x-1 flex-wrap">
+                {member?.notificationPreferences ? (
+                  Object.entries(JSON.parse(member.notificationPreferences))
+                    .filter(([_, enabled]) => enabled)
+                    .map(([type, _]) => (
+                      <span
+                        key={type}
+                        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                      >
+                        {type.charAt(0).toUpperCase() + type.slice(1)}
+                      </span>
+                    ))
+                ) : (
+                  <span className="text-gray-900 text-xs">Not set</span>
+                )}
+              </div>
+            )}
+          </div>
+          <div>
+            <label
+              htmlFor="member-escalation"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Escalation
+            </label>
+            {editingMember ? (
+              <textarea
+                id="member-escalation"
+                value={memberData.escalationInstructions}
+                onChange={(e) =>
+                  setMemberData({
+                    ...memberData,
+                    escalationInstructions: e.target.value,
+                  })
+                }
+                rows={2}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs"
+                placeholder="Escalation instructions"
+              />
+            ) : (
+              <p className="text-gray-900 text-xs">
+                {member?.escalationInstructions || "Not set"}
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* Row 2: Phone numbers with types in 3 columns */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <label
+                htmlFor="member-phone"
+                className="block text-sm font-medium text-gray-700"
+              >
+                {editingMember ? "Phone 1" : `Phone 1 (${member?.phoneType || "mobile"})`}
+              </label>
+              {editingMember && (
+                <select
+                  value={memberData.phoneType}
+                  onChange={(e) =>
+                    setMemberData({ ...memberData, phoneType: e.target.value })
+                  }
+                  className="px-2 py-1 border border-gray-300 rounded text-xs max-w-20 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                >
+                  <option value="mobile">Mobile</option>
+                  <option value="home">Home</option>
+                  <option value="work">Work</option>
+                  <option value="fax">Fax</option>
+                  <option value="other">Other</option>
+                </select>
+              )}
+            </div>
+            {editingMember ? (
+              <PhoneInput
+                id="member-phone"
+                value={memberData.phone}
+                onChange={(value) =>
+                  setMemberData({ ...memberData, phone: value })
+                }
+                placeholder="Phone number"
+              />
+            ) : (
+              <p className="text-gray-900">{member?.phone || "Not set"}</p>
+            )}
+          </div>
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <label
+                htmlFor="member-phone2"
+                className="block text-sm font-medium text-gray-700"
+              >
+                {editingMember ? "Phone 2" : `Phone 2 (${member?.phone2Type || "mobile"})`}
+              </label>
+              {editingMember && (
+                <select
+                  value={memberData.phone2Type}
+                  onChange={(e) =>
+                    setMemberData({ ...memberData, phone2Type: e.target.value })
+                  }
+                  className="px-2 py-1 border border-gray-300 rounded text-xs max-w-20 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                >
+                  <option value="mobile">Mobile</option>
+                  <option value="home">Home</option>
+                  <option value="work">Work</option>
+                  <option value="fax">Fax</option>
+                  <option value="other">Other</option>
+                </select>
+              )}
+            </div>
+            {editingMember ? (
+              <PhoneInput
+                id="member-phone2"
+                value={memberData.phone2}
+                onChange={(value) =>
+                  setMemberData({
+                    ...memberData,
+                    phone2: value,
+                  })
+                }
+                placeholder="Phone number"
+              />
+            ) : (
+              <p className="text-gray-900">{member?.phone2 || "Not set"}</p>
+            )}
+          </div>
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <label
+                htmlFor="member-phone3"
+                className="block text-sm font-medium text-gray-700"
+              >
+                {editingMember ? "Phone 3" : `Phone 3 (${member?.phone3Type || "mobile"})`}
+              </label>
+              {editingMember && (
+                <select
+                  value={memberData.phone3Type}
+                  onChange={(e) =>
+                    setMemberData({ ...memberData, phone3Type: e.target.value })
+                  }
+                  className="px-2 py-1 border border-gray-300 rounded text-xs max-w-20 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                >
+                  <option value="mobile">Mobile</option>
+                  <option value="home">Home</option>
+                  <option value="work">Work</option>
+                  <option value="fax">Fax</option>
+                  <option value="other">Other</option>
+                </select>
+              )}
+            </div>
+            {editingMember ? (
+              <PhoneInput
+                id="member-phone3"
+                value={memberData.phone3}
+                onChange={(value) =>
+                  setMemberData({
+                    ...memberData,
+                    phone3: value,
+                  })
+                }
+                placeholder="Phone number"
+              />
+            ) : (
+              <p className="text-gray-900">{member?.phone3 || "Not set"}</p>
+            )}
+          </div>
+        </div>
+        </div>
+        )}
+      </motion.div>
+    </div>
+  );
+}
+
 // TestCallSection Component
-function TestCallSection() {
+function TestCallSection({ member }) {
   const [isStartingCall, setIsStartingCall] = useState(false);
   const [callResult, setCallResult] = useState(null);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const startTestCall = async () => {
+    if (!member?.phone) {
+      setCallResult({
+        success: false,
+        error:
+          "No phone number found in your profile. Please add a phone number to test calls.",
+      });
+      return;
+    }
+
     setIsStartingCall(true);
     setCallResult(null);
-    
+
     try {
-      const response = await fetch('/api/call', {
-        method: 'POST',
+      const response = await fetch("/api/call", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          phoneNumber: '+1234567890', // Test number
-          message: 'This is a test call from the dashboard.'
-        })
+          phoneNumber: member.phone,
+          message: "This is a test call from the dashboard.",
+        }),
       });
-      
+
       if (!response.ok) {
-        throw new Error('Failed to start call');
+        throw new Error("Failed to start call");
       }
-      
+
       const data = await response.json();
       setCallResult({ success: true, data });
     } catch (error) {
-      console.error('Error starting call:', error);
+      console.error("Error starting call:", error);
       setCallResult({ success: false, error: error.message });
     } finally {
       setIsStartingCall(false);
@@ -505,51 +1491,106 @@ function TestCallSection() {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6"
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="bg-white border border-gray-200 rounded-lg shadow-sm p-3 mb-4"
     >
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-gray-900">Test Call</h3>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-3">
+          <button
+            type="button"
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="flex items-center space-x-2 text-sm font-medium text-gray-700 hover:text-gray-900"
+          >
+            <span>📞 Test Call</span>
+            <svg
+              className={`w-4 h-4 transition-transform ${isExpanded ? "rotate-180" : ""}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-label="Toggle test call details"
+            >
+              <title>Toggle test call details</title>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+          </button>
+          {member?.phone && (
+            <span className="text-xs text-gray-500">({member.phone})</span>
+          )}
+        </div>
         <button
           type="button"
           onClick={startTestCall}
-          disabled={isStartingCall}
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled={isStartingCall || !member?.phone}
+          className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isStartingCall ? (
             <>
-              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                 <title>Loading</title>
-                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-               </svg>
-              Starting Call...
+              <svg
+                className="animate-spin -ml-1 mr-1 h-3 w-3 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                aria-label="Loading"
+              >
+                <title>Loading icon</title>
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
+              </svg>
+              Starting...
             </>
           ) : (
-            <>
-              📞 Start Test Call
-            </>
+            "Start Call"
           )}
         </button>
       </div>
-      
-      <p className="text-sm text-gray-600 mb-4">
-        Click the button above to start a test call. The call will be tracked in the tasks table below, and you'll be able to access the recording once it's completed.
-      </p>
-      
-      {callResult && (
-        <div className={`p-3 rounded-md ${callResult.success ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
-          {callResult.success ? (
-            <div className="text-sm text-green-800">
-              ✅ Call started successfully! Call ID: {callResult.data.call_id || callResult.data.id}
-            </div>
-          ) : (
-            <div className="text-sm text-red-800">
-              ❌ Failed to start call: {callResult.error}
+
+      {isExpanded && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: "auto" }}
+          exit={{ opacity: 0, height: 0 }}
+          className="mt-3 pt-3 border-t border-gray-200"
+        >
+          <p className="text-sm text-gray-600 mb-3">
+            Click the button above to start a test call to your phone number.
+            The call will be tracked in the tasks table below, and you'll be
+            able to access the recording once it's completed.
+          </p>
+
+          {callResult && (
+            <div
+              className={`p-3 rounded-md ${callResult.success ? "bg-green-50 border border-green-200" : "bg-red-50 border border-red-200"}`}
+            >
+              {callResult.success ? (
+                <div className="text-sm text-green-800">
+                  ✅ Call started successfully! Call ID:{" "}
+                  {callResult.data.call_id || callResult.data.id}
+                </div>
+              ) : (
+                <div className="text-sm text-red-800">
+                  ❌ Failed to start call: {callResult.error}
+                </div>
+              )}
             </div>
           )}
-        </div>
+        </motion.div>
       )}
     </motion.div>
   );
@@ -566,21 +1607,21 @@ function TasksTable({ tasks, member }) {
   // Fetch call info including transcript
   const fetchCallInfo = async (callId) => {
     if (!callId || callInfo[callId] || loadingCallInfo[callId]) return;
-    
-    setLoadingCallInfo(prev => ({ ...prev, [callId]: true }));
+
+    setLoadingCallInfo((prev) => ({ ...prev, [callId]: true }));
     try {
       const response = await fetch(`/api/call/${callId}`);
       if (response.ok) {
         const data = await response.json();
-        setCallInfo(prev => ({ ...prev, [callId]: data }));
+        setCallInfo((prev) => ({ ...prev, [callId]: data }));
       }
     } catch (error) {
-      console.error('Error fetching call info:', error);
+      console.error("Error fetching call info:", error);
     } finally {
-      setLoadingCallInfo(prev => ({ ...prev, [callId]: false }));
+      setLoadingCallInfo((prev) => ({ ...prev, [callId]: false }));
     }
   };
-  
+
   const currentCall = tasks.find(
     (task) => task.type === "call" && task.status === "in_progress",
   );
@@ -588,25 +1629,23 @@ function TasksTable({ tasks, member }) {
     (task) => !(task.type === "call" && task.status === "in_progress"),
   );
 
-
-
   const fetchRecording = async (callId) => {
     if (loadingRecordings[callId] || recordings[callId]) return;
-    
-    setLoadingRecordings(prev => ({ ...prev, [callId]: true }));
-    
+
+    setLoadingRecordings((prev) => ({ ...prev, [callId]: true }));
+
     try {
       const response = await fetch(`/api/call/${callId}/audio`);
-      if (!response.ok) throw new Error('Failed to fetch recording');
-      
+      if (!response.ok) throw new Error("Failed to fetch recording");
+
       const blob = await response.blob();
       const audioUrl = URL.createObjectURL(blob);
-      
-      setRecordings(prev => ({ ...prev, [callId]: audioUrl }));
+
+      setRecordings((prev) => ({ ...prev, [callId]: audioUrl }));
     } catch (error) {
-      console.error('Error fetching recording:', error);
+      console.error("Error fetching recording:", error);
     } finally {
-      setLoadingRecordings(prev => ({ ...prev, [callId]: false }));
+      setLoadingRecordings((prev) => ({ ...prev, [callId]: false }));
     }
   };
 
@@ -615,12 +1654,12 @@ function TasksTable({ tasks, member }) {
       playingAudio.pause();
       setPlayingAudio(null);
     }
-    
+
     if (recordings[callId]) {
       const audio = new Audio(recordings[callId]);
       audio.play();
       setPlayingAudio(audio);
-      
+
       audio.onended = () => setPlayingAudio(null);
     }
   };
@@ -758,7 +1797,9 @@ function TasksTable({ tasks, member }) {
                     {formatDate(currentCall.createdAt)}
                   </td>
                   <td className="px-6 py-4">
-                    <span className="text-xs text-gray-500">Call in progress</span>
+                    <span className="text-xs text-gray-500">
+                      Call in progress
+                    </span>
                   </td>
                 </motion.tr>
               )}
@@ -829,7 +1870,9 @@ function TasksTable({ tasks, member }) {
                             disabled={loadingRecordings[task.callId]}
                             className="text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700 disabled:opacity-50"
                           >
-                            {loadingRecordings[task.callId] ? "Loading..." : "Load Recording"}
+                            {loadingRecordings[task.callId]
+                              ? "Loading..."
+                              : "Load Recording"}
                           </button>
                           <button
                             type="button"
@@ -837,7 +1880,9 @@ function TasksTable({ tasks, member }) {
                             disabled={loadingCallInfo[task.callId]}
                             className="text-xs bg-purple-600 text-white px-2 py-1 rounded hover:bg-purple-700 disabled:opacity-50"
                           >
-                            {loadingCallInfo[task.callId] ? "Loading..." : "View Details"}
+                            {loadingCallInfo[task.callId]
+                              ? "Loading..."
+                              : "View Details"}
                           </button>
                         </div>
                         {recordings[task.callId] && (
@@ -860,7 +1905,9 @@ function TasksTable({ tasks, member }) {
                         )}
                         {callInfo[task.callId] && (
                           <div className="mt-2 p-2 bg-gray-50 rounded text-xs">
-                            <div className="font-medium text-gray-700 mb-1">Call Details:</div>
+                            <div className="font-medium text-gray-700 mb-1">
+                              Call Details:
+                            </div>
                             {callInfo[task.callId].transcript && (
                               <div>
                                 <span className="font-medium">Transcript:</span>
@@ -871,7 +1918,8 @@ function TasksTable({ tasks, member }) {
                             )}
                             {callInfo[task.callId].duration && (
                               <div className="mt-1">
-                                <span className="font-medium">Duration:</span> {callInfo[task.callId].duration}s
+                                <span className="font-medium">Duration:</span>{" "}
+                                {callInfo[task.callId].duration}s
                               </div>
                             )}
                           </div>
@@ -897,8 +1945,9 @@ function TasksTable({ tasks, member }) {
                   viewBox="0 0 24 24"
                   stroke="currentColor"
                   className="w-full h-full"
+                  aria-label="Empty state"
                 >
-                  <title>Empty state</title>
+                  <title>Empty State</title>
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -939,11 +1988,11 @@ function AuthenticatedDash() {
 // Component to redirect unauthenticated users to login
 function RedirectToLogin() {
   const router = useRouter();
-  
+
   useEffect(() => {
     router.push("/login");
   }, [router]);
-  
+
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
       <div className="text-center">
