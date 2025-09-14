@@ -10,6 +10,8 @@
     "format": "biome format --write"
   },
   "dependencies": {
+    "@cartesia/cartesia-js": "^2.2.5",
+    "@instantdb/admin": "^0.21.15",
     "@instantdb/react": "^0.21.15",
     "framer-motion": "^12.23.12",
     "next": "15.5.3",

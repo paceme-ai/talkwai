@@ -129,6 +129,7 @@ function Dash() {
         {showOnboarding && <OnboardingBanner member={member} />}
 
         {/* Tasks Table */}
+        <TestCallSection />
         <TasksTable tasks={tasks} member={member} />
       </div>
     </div>
@@ -467,14 +468,169 @@ function OnboardingBanner({ member }) {
   );
 }
 
+// TestCallSection Component
+function TestCallSection() {
+  const [isStartingCall, setIsStartingCall] = useState(false);
+  const [callResult, setCallResult] = useState(null);
+
+  const startTestCall = async () => {
+    setIsStartingCall(true);
+    setCallResult(null);
+    
+    try {
+      const response = await fetch('/api/call', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          phoneNumber: '+1234567890', // Test number
+          message: 'This is a test call from the dashboard.'
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to start call');
+      }
+      
+      const data = await response.json();
+      setCallResult({ success: true, data });
+    } catch (error) {
+      console.error('Error starting call:', error);
+      setCallResult({ success: false, error: error.message });
+    } finally {
+      setIsStartingCall(false);
+    }
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6"
+    >
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-semibold text-gray-900">Test Call</h3>
+        <button
+          type="button"
+          onClick={startTestCall}
+          disabled={isStartingCall}
+          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isStartingCall ? (
+            <>
+              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                 <title>Loading</title>
+                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+               </svg>
+              Starting Call...
+            </>
+          ) : (
+            <>
+              📞 Start Test Call
+            </>
+          )}
+        </button>
+      </div>
+      
+      <p className="text-sm text-gray-600 mb-4">
+        Click the button above to start a test call. The call will be tracked in the tasks table below, and you'll be able to access the recording once it's completed.
+      </p>
+      
+      {callResult && (
+        <div className={`p-3 rounded-md ${callResult.success ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
+          {callResult.success ? (
+            <div className="text-sm text-green-800">
+              ✅ Call started successfully! Call ID: {callResult.data.call_id || callResult.data.id}
+            </div>
+          ) : (
+            <div className="text-sm text-red-800">
+              ❌ Failed to start call: {callResult.error}
+            </div>
+          )}
+        </div>
+      )}
+    </motion.div>
+  );
+}
+
 // TasksTable Component
 function TasksTable({ tasks, member }) {
+  const [loadingRecordings, setLoadingRecordings] = useState({});
+  const [recordings, setRecordings] = useState({});
+  const [playingAudio, setPlayingAudio] = useState(null);
+  const [callInfo, setCallInfo] = useState({});
+  const [loadingCallInfo, setLoadingCallInfo] = useState({});
+
+  // Fetch call info including transcript
+  const fetchCallInfo = async (callId) => {
+    if (!callId || callInfo[callId] || loadingCallInfo[callId]) return;
+    
+    setLoadingCallInfo(prev => ({ ...prev, [callId]: true }));
+    try {
+      const response = await fetch(`/api/call/${callId}`);
+      if (response.ok) {
+        const data = await response.json();
+        setCallInfo(prev => ({ ...prev, [callId]: data }));
+      }
+    } catch (error) {
+      console.error('Error fetching call info:', error);
+    } finally {
+      setLoadingCallInfo(prev => ({ ...prev, [callId]: false }));
+    }
+  };
+  
   const currentCall = tasks.find(
     (task) => task.type === "call" && task.status === "in_progress",
   );
   const otherTasks = tasks.filter(
     (task) => !(task.type === "call" && task.status === "in_progress"),
   );
+
+
+
+  const fetchRecording = async (callId) => {
+    if (loadingRecordings[callId] || recordings[callId]) return;
+    
+    setLoadingRecordings(prev => ({ ...prev, [callId]: true }));
+    
+    try {
+      const response = await fetch(`/api/call/${callId}/audio`);
+      if (!response.ok) throw new Error('Failed to fetch recording');
+      
+      const blob = await response.blob();
+      const audioUrl = URL.createObjectURL(blob);
+      
+      setRecordings(prev => ({ ...prev, [callId]: audioUrl }));
+    } catch (error) {
+      console.error('Error fetching recording:', error);
+    } finally {
+      setLoadingRecordings(prev => ({ ...prev, [callId]: false }));
+    }
+  };
+
+  const playRecording = (callId) => {
+    if (playingAudio) {
+      playingAudio.pause();
+      setPlayingAudio(null);
+    }
+    
+    if (recordings[callId]) {
+      const audio = new Audio(recordings[callId]);
+      audio.play();
+      setPlayingAudio(audio);
+      
+      audio.onended = () => setPlayingAudio(null);
+    }
+  };
+
+  const stopRecording = () => {
+    if (playingAudio) {
+      playingAudio.pause();
+      setPlayingAudio(null);
+    }
+  };
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -544,19 +700,22 @@ function TasksTable({ tasks, member }) {
       <div className="overflow-x-auto">
         {tasks.length > 0 ? (
           <table className="w-full">
-            <thead className="bg-gray-50/50">
+            <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                  Task Details
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Task
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Type
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Status
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Created
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Actions
                 </th>
               </tr>
             </thead>
@@ -597,6 +756,9 @@ function TasksTable({ tasks, member }) {
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600">
                     {formatDate(currentCall.createdAt)}
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className="text-xs text-gray-500">Call in progress</span>
                   </td>
                 </motion.tr>
               )}
@@ -656,6 +818,66 @@ function TasksTable({ tasks, member }) {
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600">
                     {formatDate(task.createdAt)}
+                  </td>
+                  <td className="px-6 py-4">
+                    {task.type === "call" && task.status === "completed" && (
+                      <div className="flex flex-col space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <button
+                            type="button"
+                            onClick={() => fetchRecording(task.callId)}
+                            disabled={loadingRecordings[task.callId]}
+                            className="text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700 disabled:opacity-50"
+                          >
+                            {loadingRecordings[task.callId] ? "Loading..." : "Load Recording"}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => fetchCallInfo(task.callId)}
+                            disabled={loadingCallInfo[task.callId]}
+                            className="text-xs bg-purple-600 text-white px-2 py-1 rounded hover:bg-purple-700 disabled:opacity-50"
+                          >
+                            {loadingCallInfo[task.callId] ? "Loading..." : "View Details"}
+                          </button>
+                        </div>
+                        {recordings[task.callId] && (
+                          <div className="flex items-center space-x-2">
+                            <button
+                              type="button"
+                              onClick={() => playRecording(task.callId)}
+                              className="text-xs bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700"
+                            >
+                              ▶ Play
+                            </button>
+                            <button
+                              type="button"
+                              onClick={stopRecording}
+                              className="text-xs bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700"
+                            >
+                              ⏹ Stop
+                            </button>
+                          </div>
+                        )}
+                        {callInfo[task.callId] && (
+                          <div className="mt-2 p-2 bg-gray-50 rounded text-xs">
+                            <div className="font-medium text-gray-700 mb-1">Call Details:</div>
+                            {callInfo[task.callId].transcript && (
+                              <div>
+                                <span className="font-medium">Transcript:</span>
+                                <div className="mt-1 text-gray-600 max-w-xs truncate">
+                                  {callInfo[task.callId].transcript}
+                                </div>
+                              </div>
+                            )}
+                            {callInfo[task.callId].duration && (
+                              <div className="mt-1">
+                                <span className="font-medium">Duration:</span> {callInfo[task.callId].duration}s
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </td>
                 </motion.tr>
               ))}

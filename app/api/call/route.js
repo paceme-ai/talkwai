@@ -1,4 +1,10 @@
 import { NextResponse } from "next/server";
+import { init } from "@instantdb/admin";
+
+const db = init({
+  appId: process.env.NEXT_PUBLIC_INSTANT_APP_ID,
+  adminToken: process.env.INSTANT_ADMIN_TOKEN,
+});
 
 export async function POST(request) {
   try {
@@ -55,6 +61,39 @@ export async function POST(request) {
     }
 
     const data = await response.json();
+
+    // Store call information in InstantDB
+    try {
+      const callId = data.call_id || data.id; // Cartesia might return call_id or id
+      if (callId) {
+        const now = Date.now();
+        await db.transact([
+          db.tx.tasks[db.id()].update({
+            type: "call",
+            status: "in_progress",
+            priority: "medium",
+            fromAddress: "system", // or get from user context
+            toAddress: phoneNumber,
+            subject: "Outbound call",
+            content: `Call initiated to ${phoneNumber}`,
+            metadata: JSON.stringify(data), // Store full Cartesia response
+            
+            // Call-specific metadata
+            callId: callId,
+            callStatus: "dialing", // Initial status when call is created
+            callDirection: "outbound",
+            callStartTime: now, // When call was initiated
+            
+            startedAt: now,
+            createdAt: now,
+            updatedAt: now,
+          }),
+        ]);
+      }
+    } catch (dbError) {
+      console.error("Failed to store call in database:", dbError);
+      // Don't fail the API call if database storage fails
+    }
 
     return NextResponse.json({
       success: true,

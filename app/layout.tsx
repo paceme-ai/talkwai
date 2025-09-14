@@ -1,7 +1,7 @@
 // app/layout.js
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
 import Footer from "@/components/footer";
+import "./globals.css";
 import ConditionalHeader from "@/components/conditional-header";
 
 const geistSans = Geist({

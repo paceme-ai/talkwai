@@ -61,6 +61,22 @@ const _schema = i.schema({
       subject: i.string().optional(), // for emails or task description
       content: i.string().optional(), // task content/body
       metadata: i.string().optional(), // JSON string for additional data
+      
+      // Call-specific metadata fields
+      callId: i.string().indexed().optional(), // Cartesia call ID for voice calls
+      callStatus: i.string().indexed().optional(), // dialing, in_progress, completed, failed, no_answer
+      callDirection: i.string().indexed().optional(), // inbound, outbound
+      callDuration: i.number().indexed().optional(), // call duration in seconds
+      callStartTime: i.number().indexed().optional(), // actual call start timestamp
+      callEndTime: i.number().indexed().optional(), // actual call end timestamp
+      callEndReason: i.string().optional(), // hangup reason: user_hangup, agent_hangup, timeout, error
+      callRecordingUrl: i.string().optional(), // URL to call recording
+      callTranscript: i.string().optional(), // full call transcript
+      callSummary: i.string().optional(), // AI-generated call summary
+      callSentiment: i.string().optional(), // positive, negative, neutral
+      callSuccessful: i.boolean().optional(), // whether call achieved its goal
+      callCost: i.number().optional(), // cost of the call in cents
+      
       scheduledAt: i.number().indexed().optional(),
       startedAt: i.number().indexed().optional(),
       completedAt: i.number().indexed().optional(),
@@ -116,6 +132,11 @@ const _schema = i.schema({
     taskCreatedByAdmin: {
       forward: { on: "tasks", has: "one", label: "createdByAdmin" },
       reverse: { on: "admins", has: "many", label: "createdTasks" },
+    },
+
+    taskAudioFile: {
+      forward: { on: "tasks", has: "one", label: "audioFile" },
+      reverse: { on: "$files", has: "one", label: "task" },
     },
   },
 
