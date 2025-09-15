@@ -100,12 +100,6 @@ function Dash() {
       : null,
   );
 
-  useEffect(() => {
-    if (user?.email) {
-      setEmailVerified(true);
-    }
-  }, [user]);
-
   // Handle new users directly on dashboard (no redirect needed)
   useEffect(() => {
     if (!memberLoading && user && !member) {
@@ -248,7 +242,7 @@ function OnboardingForm({ user }) {
     phone: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  // const [_agentCallId, setAgentCallId] = useState(null);
+  const [_agentCallId, setAgentCallId] = useState(null);
 
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -316,7 +310,7 @@ function OnboardingForm({ user }) {
 
       const result = await response.json();
       if (result.success && result.agentCallId) {
-        setCallId(result.agentCallId);
+        setAgentCallId(result.agentCallId);
 
         // Create initial task for call follow-up
         await db.transact(
