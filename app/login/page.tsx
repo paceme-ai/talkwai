@@ -1,5 +1,4 @@
 "use client";
-import Link from "next/link";
 import { useState } from "react";
 import db from "@/lib/db";
 
@@ -81,16 +80,10 @@ export default function LoginPage() {
 
   return (
     <main className="mx-auto max-w-md px-6 py-12">
-      {/* Back to register link */}
+      {/* Welcome message */}
       <div className="mb-8 text-center">
         <p className="text-gray-600">
-          Don't have an account?{" "}
-          <Link
-            href="/register"
-            className="text-emerald-600 font-semibold hover:underline"
-          >
-            Sign up here
-          </Link>
+          If you're brand-new, we'll get you set up on the next page
         </p>
       </div>
 

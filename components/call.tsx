@@ -1,10 +1,10 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import db, { id } from "@/lib/db";
+import { useEffect, useState } from "react";
 import PhoneInput, { formatPhoneForDB } from "@/components/phone-input";
+import db, { id } from "@/lib/db";
 
-export default function CallForm() {
+export default function CallForm({ onRegistrationComplete }) {
   const [tenant, setTenant] = useState("");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -12,8 +12,15 @@ export default function CallForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState("");
   const router = useRouter();
+  const auth = db.useAuth();
+  const user = auth.user;
 
-
+  // Pre-fill email if user is authenticated
+  useEffect(() => {
+    if (user?.email && !email) {
+      setEmail(user.email);
+    }
+  }, [user?.email, email]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -61,6 +68,10 @@ export default function CallForm() {
 
       // Create member and link to tenant
       const formattedPhoneForDB = formatPhoneForDB(phoneNumber);
+
+      // Detect authentication method - if user is already authenticated, they came via Google OAuth
+      const authMethod = user ? "google" : "magic_code";
+
       await db.transact(
         db.tx.members[memberId]
           .update({
@@ -70,6 +81,7 @@ export default function CallForm() {
             phone: formattedPhoneForDB,
             role: "owner",
             status: "active",
+            authMethod: authMethod,
             createdAt: Date.now(),
             updatedAt: Date.now(),
           })
@@ -109,22 +121,35 @@ export default function CallForm() {
       const data = await response.json();
 
       if (response.ok) {
-        // Send magic code for authentication
-        await db.auth.sendMagicCode({ email });
+        const memberData = {
+          memberId,
+          tenantId,
+          email,
+          name: `${firstName} ${lastName}`.trim(),
+        };
 
-        // Store member info in localStorage for the loading page
-        localStorage.setItem(
-          "pendingMember",
-          JSON.stringify({
-            memberId,
-            tenantId,
-            email,
-            name: `${firstName} ${lastName}`.trim(),
-          }),
-        );
+        if (user) {
+          // User is already authenticated (Google OAuth), skip magic code
+          console.log("User already authenticated, skipping magic code");
+          if (onRegistrationComplete) {
+            onRegistrationComplete(memberData);
+          } else {
+            router.push("/dash");
+          }
+        } else {
+          // Send magic code for authentication
+          await db.auth.sendMagicCode({ email });
 
-        // Route to dashboard page
-        router.push("/dash");
+          if (onRegistrationComplete) {
+            // If callback provided (register page), call it instead of routing
+            onRegistrationComplete(memberData);
+          } else {
+            // Store member info in localStorage for the loading page
+            localStorage.setItem("pendingMember", JSON.stringify(memberData));
+            // Route to dashboard page
+            router.push("/dash");
+          }
+        }
       } else {
         setMessage(data.error || "Failed to initiate call");
       }

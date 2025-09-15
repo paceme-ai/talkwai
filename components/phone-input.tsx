@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 // Phone number formatting utilities
 const formatPhoneDisplay = (value: string): string => {
@@ -69,7 +69,7 @@ export default function PhoneInput({
     const input = e.target.value;
     const formatted = formatPhoneDisplay(input);
     setDisplayValue(formatted);
-    
+
     // Convert to DB format for parent component
     const dbFormat = formatPhoneForDB(input);
     onChange(dbFormat);
@@ -80,7 +80,7 @@ export default function PhoneInput({
     const pastedText = e.clipboardData.getData("text");
     const formatted = formatPhoneDisplay(pastedText);
     setDisplayValue(formatted);
-    
+
     // Convert to DB format for parent component
     const dbFormat = formatPhoneForDB(pastedText);
     onChange(dbFormat);

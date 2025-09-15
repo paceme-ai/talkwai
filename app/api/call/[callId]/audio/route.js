@@ -9,8 +9,9 @@ const db = init({
 export async function GET(_request, { params }) {
   try {
     const { callId } = await params;
+    const agentCallId = callId;
 
-    if (!callId) {
+    if (!agentCallId) {
       return NextResponse.json(
         { error: "Call ID is required" },
         { status: 400 },
@@ -26,9 +27,38 @@ export async function GET(_request, { params }) {
       );
     }
 
+    // Check if audio is already linked to avoid re-downloading
+    try {
+      const existingTasks = await db.query({
+        tasks: {
+          $: { where: { agentCallId: agentCallId } },
+          audioFile: {},
+        },
+      });
+
+      const existingTask = existingTasks?.tasks?.[0];
+      if (existingTask?.audioFile) {
+        // Audio already exists, return early
+        return NextResponse.json({
+          success: true,
+          message: "Audio file already exists",
+          audioAvailable: true,
+          file: {
+            id: existingTask.audioFile.id,
+            path: existingTask.audioFile.path,
+            url: existingTask.audioFile.url,
+            agentCallId: agentCallId,
+          },
+        });
+      }
+    } catch (checkError) {
+      console.error("Failed to check existing audio:", checkError);
+      // Continue with download if check fails
+    }
+
     // Download audio from Cartesia API
     const response = await fetch(
-      `https://agents-preview.cartesia.ai/agents/calls/${callId}/audio`,
+      `https://agents-preview.cartesia.ai/agents/calls/${agentCallId}/audio`,
       {
         method: "GET",
         headers: {
@@ -51,19 +81,19 @@ export async function GET(_request, { params }) {
     const audioData = await response.arrayBuffer();
 
     // Convert to File object for InstantDB storage
-    const audioFile = new File([audioData], `call-${callId}.wav`, {
+    const audioFile = new File([audioData], `call-${agentCallId}.wav`, {
       type: "audio/wav",
     });
 
     // Upload to InstantDB $files
-    const filePath = `calls/${callId}/audio.wav`;
+    const filePath = `calls/${agentCallId}/audio.wav`;
     const { data: fileData } = await db.storage.uploadFile(filePath, audioFile);
 
     // Find the task associated with this call and link the audio file
     try {
-      const { data: tasks } = await db.query({
+      const tasks = await db.query({
         tasks: {
-          $: { where: { callId: callId } },
+          $: { where: { agentCallId: agentCallId } },
         },
       });
 
@@ -81,11 +111,12 @@ export async function GET(_request, { params }) {
     return NextResponse.json({
       success: true,
       message: "Audio file uploaded successfully",
+      audioAvailable: true,
       file: {
         id: fileData.id,
         path: fileData.path,
         url: fileData.url,
-        callId: callId,
+        agentCallId: agentCallId,
       },
     });
   } catch (error) {

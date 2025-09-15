@@ -69,6 +69,7 @@ const _schema = i.schema({
       phone3Type: i.string().optional(), // Mobile, Home, Work, Other
       notificationPreferences: i.string().optional(), // JSON object: {text: bool, email: bool, app: bool}
       escalationInstructions: i.string().optional(),
+      authMethod: i.string().indexed().optional(), // google, magic_code
 
       createdAt: i.number().indexed(),
       updatedAt: i.number().indexed(),
@@ -106,7 +107,7 @@ const _schema = i.schema({
       metadata: i.string().optional(), // JSON string for additional data
 
       // Call-specific metadata fields
-      callId: i.string().indexed().optional(), // Cartesia call ID for voice calls
+      agentCallId: i.string().indexed().optional(), // Cartesia call ID for voice calls
       callStatus: i.string().indexed().optional(), // dialing, in_progress, completed, failed, no_answer
       callDirection: i.string().indexed().optional(), // inbound, outbound
       callDuration: i.number().indexed().optional(), // call duration in seconds
@@ -115,6 +116,7 @@ const _schema = i.schema({
       callEndReason: i.string().optional(), // hangup reason: user_hangup, agent_hangup, timeout, error
       callRecordingUrl: i.string().optional(), // URL to call recording
       callTranscript: i.string().optional(), // full call transcript
+      transcriptJson: i.string().optional(), // turn-by-turn transcript as JSON
       callSummary: i.string().optional(), // AI-generated call summary
       callSentiment: i.string().optional(), // positive, negative, neutral
       callSuccessful: i.boolean().optional(), // whether call achieved its goal
