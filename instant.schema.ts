@@ -122,6 +122,26 @@ const _schema = i.schema({
       callSuccessful: i.boolean().optional(), // whether call achieved its goal
       callCost: i.number().optional(), // cost of the call in cents
 
+      // Lead information from voice agent completion
+      leadsCompany: i.string().optional(),
+      leadsDomain: i.string().optional(),
+      leadsAddress: i.string().optional(),
+      leadsIndustry: i.string().indexed().optional(),
+      leadsHoursOfOperation: i.string().optional(),
+      leadsInterestLevel: i.string().indexed().optional(), // low, medium, high
+      leadsPainPoints: i.string().optional(), // JSON array
+      leadsNextSteps: i.string().optional(),
+      leadsNotes: i.string().optional(),
+
+      // Research information from voice agent completion
+      researchCompanyOverview: i.string().optional(),
+      researchPainPoints: i.string().optional(), // JSON array
+      researchKeyPeople: i.string().optional(), // JSON array
+      researchSalesOpportunities: i.string().optional(), // JSON array
+
+      // Submission metadata
+      submissionType: i.string().indexed().optional(), // voice_agent_completion, manual, etc.
+
       scheduledAt: i.number().indexed().optional(),
       startedAt: i.number().indexed().optional(),
       completedAt: i.number().indexed().optional(),
